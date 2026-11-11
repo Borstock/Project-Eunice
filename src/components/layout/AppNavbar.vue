@@ -1,0 +1,104 @@
+<script setup lang="ts">
+import { RouterLink, useRoute } from 'vue-router'
+import ThemeToggle from './ThemeToggle.vue'
+
+const route = useRoute()
+
+const navItems = [
+  { name: 'Today', path: '/today' },
+  { name: 'Weekly', path: '/weekly' },
+  { name: 'Manage Habits', path: '/habits' }
+]
+
+function isActive(path: string): boolean {
+  return route?.path === path
+}
+</script>
+
+<template>
+  <header
+    class="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors"
+  >
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo / Brand -->
+        <RouterLink to="/today" class="flex items-center space-x-2.5 group">
+          <div
+            class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform"
+          >
+            <span class="text-lg">🎯</span>
+          </div>
+          <span class="font-bold text-lg text-gray-900 dark:text-white tracking-tight">
+            Habit Tracker
+          </span>
+        </RouterLink>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center space-x-1">
+          <RouterLink
+            v-for="item in navItems"
+            :key="item.path"
+            :to="item.path"
+            class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors"
+            :class="
+              isActive(item.path)
+                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-semibold'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+            "
+          >
+            {{ item.name }}
+          </RouterLink>
+        </nav>
+
+        <!-- Theme Toggle -->
+        <div class="flex items-center space-x-2">
+          <ThemeToggle />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav
+    class="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 py-1.5 px-4 flex justify-around items-center"
+  >
+    <RouterLink
+      to="/today"
+      class="flex flex-col items-center py-1 px-3 rounded-lg text-xs font-medium transition-colors"
+      :class="
+        isActive('/today')
+          ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+          : 'text-gray-500 dark:text-gray-400'
+      "
+    >
+      <span class="text-base mb-0.5">📅</span>
+      <span>Today</span>
+    </RouterLink>
+
+    <RouterLink
+      to="/weekly"
+      class="flex flex-col items-center py-1 px-3 rounded-lg text-xs font-medium transition-colors"
+      :class="
+        isActive('/weekly')
+          ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+          : 'text-gray-500 dark:text-gray-400'
+      "
+    >
+      <span class="text-base mb-0.5">📊</span>
+      <span>Weekly</span>
+    </RouterLink>
+
+    <RouterLink
+      to="/habits"
+      class="flex flex-col items-center py-1 px-3 rounded-lg text-xs font-medium transition-colors"
+      :class="
+        isActive('/habits')
+          ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+          : 'text-gray-500 dark:text-gray-400'
+      "
+    >
+      <span class="text-base mb-0.5">⚙️</span>
+      <span>Habits</span>
+    </RouterLink>
+  </nav>
+</template>
