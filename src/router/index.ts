@@ -5,13 +5,22 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
       redirect: '/today'
     },
     {
       path: '/today',
       name: 'today',
       component: () => import('@/views/TodayView.vue')
+    },
+    {
+      path: '/weekly',
+      name: 'weekly',
+      component: () => import('@/views/WeeklyView.vue')
+    },
+    {
+      path: '/habits',
+      name: 'habits',
+      component: () => import('@/views/HabitsView.vue')
     }
   ]
 })
