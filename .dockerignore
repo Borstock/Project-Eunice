@@ -1,0 +1,12 @@
+.git
+.tools
+node_modules
+dist
+dist-ssr
+coverage
+test-results
+playwright-report
+.nyc_output
+*.log
+.DS_Store
+Thumbs.db
