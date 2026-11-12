@@ -89,7 +89,14 @@ The application is structured around a decoupled storage layer to guarantee high
    npm install
    ```
 
-3. **Start the development server:**
+3. **Configure environment variables (optional):**
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local to override defaults
+   ```
+   See [Environment Variables](#environment-variables) for details.
+
+4. **Start the development server:**
    ```bash
    npm run dev
    ```
@@ -135,6 +142,29 @@ docker-compose down
 
 ---
 
+## Environment Variables
+
+All runtime configuration lives in `src/config/env.ts` and is read exclusively from that module — no component or store imports `import.meta.env` directly.
+
+> **⚠️ Security:** All `VITE_` variables are compiled into the browser bundle and are publicly visible. **Never store secrets, API keys, or passwords in them.**
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `VITE_APP_NAME` | `Habit Tracker` | Display name shown in the navbar and browser tab. |
+| `VITE_STORAGE_PREFIX` | `habit_tracker_` | Namespace prefix for every `localStorage` key. Valid characters: `a-z A-Z 0-9 _ -`. Changing this migrates existing data automatically on first load. |
+| `VITE_ENABLE_DEBUG` | `false` | Set to `"true"` to enable verbose `console.debug` logging. Any other value disables it. |
+
+### Local setup
+```bash
+cp .env.example .env.local   # already gitignored
+# Then edit .env.local — only override what you need
+```
+
+### Vercel setup
+In the Vercel dashboard go to **Project Settings → Environment Variables**, add each `VITE_*` key for the desired environments (Production / Preview / Development). Vercel injects them at build time; no secrets are needed here.
+
+---
+
 ## Available Scripts
 
 | Script | Purpose |
@@ -168,17 +198,22 @@ Project-Eunice/
 │   │   ├── calendar/              # WeeklyView, DayCell
 │   │   └── layout/                # Navbar, Footer, ThemeToggle
 │   ├── composables/               # Vue composables (e.g. useTheme, useDate)
+│   ├── config/
+│   │   └── env.ts                 # Typed, validated environment config (single source of truth)
 │   ├── models/                    # TypeScript interfaces and domain types
 │   ├── router/                    # Vue Router route configuration
 │   ├── services/
 │   │   └── storage/               # Pluggable storage abstraction (LocalStorage, etc.)
 │   ├── stores/                    # Pinia state stores (habit store, settings store)
+│   ├── utils/                     # Pure helpers (date, streak, logger, …)
 │   ├── views/                     # Top-level view pages (TodayView, HabitsView, WeeklyView)
 │   ├── App.vue                    # Root component
+│   ├── env.d.ts                   # Vite env type declarations
 │   └── main.ts                    # Application bootstrap
 ├── tests/
 │   ├── unit/                      # Vitest unit and component tests
 │   └── e2e/                       # Playwright end-to-end tests
+├── .env.example                   # Template for local env variables (committed, no secrets)
 ├── .dockerignore
 ├── .eslintrc.cjs
 ├── .gitignore

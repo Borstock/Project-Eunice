@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
 import ThemeToggle from './ThemeToggle.vue'
+import { APP_NAME } from '@/config/env'
 
 const route = useRoute()
 
@@ -29,7 +30,7 @@ function isActive(path: string): boolean {
             <span class="text-lg">🎯</span>
           </div>
           <span class="font-bold text-lg text-gray-900 dark:text-white tracking-tight">
-            Habit Tracker
+            {{ APP_NAME }}
           </span>
         </RouterLink>
 
