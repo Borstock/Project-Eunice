@@ -5,6 +5,8 @@ export interface Habit {
   color: string
   createdAt: string
   archived?: boolean
+  /** True for habits injected by the demo data generator — never set on real user habits. */
+  isDemo?: boolean
 }
 
 export interface HabitCompletion {

@@ -9,10 +9,11 @@ node_modules/
 dist/
 dist-ssr/
 
-# Environment files
+# Environment files - keep only the example template
 .env
 .env.local
 .env.*.local
+!.env.example
 
 # Logs
 npm-debug.log*

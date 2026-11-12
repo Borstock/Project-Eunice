@@ -1,14 +1,45 @@
 import type { IStorageService } from './IStorageService'
+import { STORAGE_PREFIX, LEGACY_STORAGE_PREFIX } from '@/config/env'
+import { logger } from '@/utils/logger'
 
 export class LocalStorageService implements IStorageService {
   private readonly prefix: string
+  private readonly legacyPrefix: string
 
-  constructor(prefix = 'habit_tracker_') {
+  constructor(prefix = STORAGE_PREFIX, legacyPrefix = LEGACY_STORAGE_PREFIX) {
     this.prefix = prefix
+    this.legacyPrefix = legacyPrefix
   }
 
   private getKey(key: string): string {
     return `${this.prefix}${key}`
+  }
+
+  private getLegacyKey(key: string): string {
+    return `${this.legacyPrefix}${key}`
+  }
+
+  /**
+   * Migrate a single key from the legacy prefix to the active prefix if the
+   * active-prefix key does not yet exist. Returns true when migration happened.
+   */
+  private migrateKey(key: string): boolean {
+    if (typeof window === 'undefined' || !window.localStorage) return false
+    if (this.prefix === this.legacyPrefix) return false // nothing to migrate
+
+    const activeKey = this.getKey(key)
+    const legacyKey = this.getLegacyKey(key)
+
+    if (window.localStorage.getItem(activeKey) === null) {
+      const legacyValue = window.localStorage.getItem(legacyKey)
+      if (legacyValue !== null) {
+        window.localStorage.setItem(activeKey, legacyValue)
+        window.localStorage.removeItem(legacyKey)
+        logger.debug('LocalStorageService', `Migrated key "${key}" from legacy prefix`)
+        return true
+      }
+    }
+    return false
   }
 
   getItem<T>(key: string): T | null {
@@ -16,13 +47,14 @@ export class LocalStorageService implements IStorageService {
       if (typeof window === 'undefined' || !window.localStorage) {
         return null
       }
+      this.migrateKey(key)
       const raw = window.localStorage.getItem(this.getKey(key))
       if (raw === null) {
         return null
       }
       return JSON.parse(raw) as T
     } catch (error) {
-      console.warn(`[LocalStorageService] Failed to read key "${key}":`, error)
+      logger.warn('LocalStorageService', `Failed to read key "${key}":`, error)
       return null
     }
   }
@@ -35,7 +67,7 @@ export class LocalStorageService implements IStorageService {
       const serialized = JSON.stringify(value)
       window.localStorage.setItem(this.getKey(key), serialized)
     } catch (error) {
-      console.error(`[LocalStorageService] Failed to write key "${key}":`, error)
+      logger.error('LocalStorageService', `Failed to write key "${key}":`, error)
     }
   }
 
@@ -46,7 +78,7 @@ export class LocalStorageService implements IStorageService {
       }
       window.localStorage.removeItem(this.getKey(key))
     } catch (error) {
-      console.error(`[LocalStorageService] Failed to remove key "${key}":`, error)
+      logger.error('LocalStorageService', `Failed to remove key "${key}":`, error)
     }
   }
 
@@ -66,7 +98,7 @@ export class LocalStorageService implements IStorageService {
         window.localStorage.removeItem(key)
       }
     } catch (error) {
-      console.error('[LocalStorageService] Failed to clear keys:', error)
+      logger.error('LocalStorageService', 'Failed to clear keys:', error)
     }
   }
 }
