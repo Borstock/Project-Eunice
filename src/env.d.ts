@@ -6,3 +6,17 @@ declare module '*.vue' {
   const component: DefineComponent<Record<string, unknown>, Record<string, unknown>, any>
   export default component
 }
+
+/** Augment Vite's ImportMetaEnv with the project's own VITE_ variables. */
+interface ImportMetaEnv {
+  /** Display name of the application (default: "Habit Tracker"). */
+  readonly VITE_APP_NAME?: string
+  /** localStorage key namespace prefix (default: "habit_tracker_"). */
+  readonly VITE_STORAGE_PREFIX?: string
+  /** Enable verbose debug logging ("true" / "false", default: "false"). */
+  readonly VITE_ENABLE_DEBUG?: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}

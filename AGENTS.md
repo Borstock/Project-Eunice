@@ -140,6 +140,33 @@ export interface HabitCompletion {
 
 ---
 
+## 5. Environment Variables
+
+All runtime configuration is centralized in [`src/config/env.ts`](file:///c:/Users/David/Desktop/Project-Eunice/src/config/env.ts). **No component, store, or utility may import `import.meta.env` directly** — use the typed exports from `src/config/env.ts` exclusively.
+
+Type declarations for the variables live in [`src/env.d.ts`](file:///c:/Users/David/Desktop/Project-Eunice/src/env.d.ts).
+
+### 5.1 Available Variables
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `VITE_APP_NAME` | `"Habit Tracker"` | Display name in navbar and `<title>`. |
+| `VITE_STORAGE_PREFIX` | `"habit_tracker_"` | Namespace prefix for all `localStorage` keys. Valid chars: `a-z A-Z 0-9 _ -`. Changing it triggers automatic one-time migration of existing data. |
+| `VITE_ENABLE_DEBUG` | `"false"` | Set to `"true"` to enable verbose `console.debug` logging via `src/utils/logger.ts`. |
+
+> **⚠️ Security:** `VITE_` variables are compiled into the browser bundle and are publicly visible. **Never store secrets, API keys, or passwords in them.**
+
+### 5.2 Local Development Setup
+```bash
+cp .env.example .env.local   # .env.local is gitignored
+# Edit .env.local to override only what you need
+```
+
+### 5.3 Vercel Deployment Setup
+In the Vercel dashboard: **Project Settings → Environment Variables**. Add each `VITE_*` key for the target environments (Production / Preview / Development). Vercel injects them at build time.
+
+---
+
 ## 6. Phase 1 MVP Scope & Phase 2 Extensibility
 
 ### 6.1 Phase 1: MVP Scope
