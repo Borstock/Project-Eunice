@@ -200,6 +200,6 @@ export const useHabitStore = defineStore('habit', {
       }
 
       this.persist(storage)
-    },
+    }
   }
 })

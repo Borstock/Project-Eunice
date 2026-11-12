@@ -43,10 +43,10 @@ export interface DemoHabit {
 
 export const DEMO_HABITS: DemoHabit[] = [
   { id: 'demo-1', name: 'Morning Meditation', emoji: '🧘', color: '#6366f1', pattern: 'perfect' },
-  { id: 'demo-2', name: 'Evening Run',        emoji: '🏃', color: '#f59e0b', pattern: 'fading' },
-  { id: 'demo-3', name: 'Read 30 min',        emoji: '📚', color: '#10b981', pattern: 'weekdays' },
-  { id: 'demo-4', name: 'Drink 2 L Water',    emoji: '💧', color: '#3b82f6', pattern: 'irregular' },
-  { id: 'demo-5', name: 'Journaling',         emoji: '✍️', color: '#ec4899', pattern: 'improving' },
+  { id: 'demo-2', name: 'Evening Run', emoji: '🏃', color: '#f59e0b', pattern: 'fading' },
+  { id: 'demo-3', name: 'Read 30 min', emoji: '📚', color: '#10b981', pattern: 'weekdays' },
+  { id: 'demo-4', name: 'Drink 2 L Water', emoji: '💧', color: '#3b82f6', pattern: 'irregular' },
+  { id: 'demo-5', name: 'Journaling', emoji: '✍️', color: '#ec4899', pattern: 'improving' }
 ]
 
 // ---------------------------------------------------------------------------
@@ -78,7 +78,7 @@ export function generateDemoData(endDate?: Date): GeneratedDemo {
     emoji: dh.emoji,
     color: dh.color,
     createdAt: dates[0] + 'T00:00:00.000Z',
-    isDemo: true,
+    isDemo: true
   }))
 
   const completions: Record<string, string[]> = {}
@@ -98,7 +98,7 @@ export function generateDemoData(endDate?: Date): GeneratedDemo {
 
         case 'fading': {
           // Starts at ~95 %, drops to ~5 % by end (linear)
-          const prob = 0.95 - 0.90 * progress
+          const prob = 0.95 - 0.9 * progress
           return rng() < prob
         }
 
@@ -106,12 +106,12 @@ export function generateDemoData(endDate?: Date): GeneratedDemo {
           // Mon-Fri: ~90 % completion; Sat-Sun: ~10 %
           const dow = new Date(dateStr + 'T00:00:00').getDay() // 0=Sun,6=Sat
           const isWeekend = dow === 0 || dow === 6
-          return rng() < (isWeekend ? 0.10 : 0.90)
+          return rng() < (isWeekend ? 0.1 : 0.9)
         }
 
         case 'irregular':
           // ~50 % random
-          return rng() < 0.50
+          return rng() < 0.5
 
         case 'improving': {
           // Starts at ~15 %, climbs to ~90 % (linear)

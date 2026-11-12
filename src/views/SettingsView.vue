@@ -106,19 +106,13 @@ const dialogBody = computed(() =>
         :aria-labelledby="'dialog-title'"
       >
         <!-- Backdrop -->
-        <div
-          class="absolute inset-0 bg-black/40 dark:bg-black/60"
-          @click="cancelAction"
-        />
+        <div class="absolute inset-0 bg-black/40 dark:bg-black/60" @click="cancelAction" />
 
         <!-- Panel -->
         <div
           class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-sm p-6 space-y-4"
         >
-          <h3
-            id="dialog-title"
-            class="text-base font-semibold text-gray-900 dark:text-white"
-          >
+          <h3 id="dialog-title" class="text-base font-semibold text-gray-900 dark:text-white">
             {{ dialogTitle }}
           </h3>
           <p class="text-sm text-gray-600 dark:text-gray-300">{{ dialogBody }}</p>
