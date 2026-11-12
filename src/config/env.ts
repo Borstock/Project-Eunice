@@ -56,7 +56,7 @@ export const appConfig = Object.freeze({
   APP_NAME,
   STORAGE_PREFIX,
   LEGACY_STORAGE_PREFIX,
-  ENABLE_DEBUG,
+  ENABLE_DEBUG
 } as const)
 
 export type AppConfig = typeof appConfig

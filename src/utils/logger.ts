@@ -29,5 +29,5 @@ export const logger = {
   warn: (namespace: string, message: string, ...args: unknown[]) =>
     log('warn', namespace, message, ...args),
   error: (namespace: string, message: string, ...args: unknown[]) =>
-    log('error', namespace, message, ...args),
+    log('error', namespace, message, ...args)
 }
