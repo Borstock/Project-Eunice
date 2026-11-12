@@ -4,6 +4,7 @@ import type { IStorageService } from '@/services/storage/IStorageService'
 import { localStorageService } from '@/services/storage/LocalStorageService'
 import { getTodayDateString } from '@/utils/date'
 import { calculateCurrentStreak } from '@/utils/streak'
+import { generateDemoData } from '@/utils/demoGenerator'
 
 const HABITS_STORAGE_KEY = 'habits'
 const COMPLETIONS_STORAGE_KEY = 'completions'
@@ -154,6 +155,51 @@ export const useHabitStore = defineStore('habit', {
     getStreak(habitId: string, referenceDate: string = getTodayDateString()): number {
       const list = this.completions[habitId] || []
       return calculateCurrentStreak(list, referenceDate)
-    }
+    },
+
+    // -----------------------------------------------------------------------
+    // Demo data
+    // -----------------------------------------------------------------------
+
+    /** Returns true when at least one demo habit is currently loaded. */
+    hasDemoData(): boolean {
+      return this.habits.some((h) => h.isDemo)
+    },
+
+    /**
+     * Loads the 5 demo habits + 90-day history alongside real data.
+     * Never overwrites or modifies habits/completions that are not flagged isDemo.
+     */
+    loadDemoData(storage: IStorageService = localStorageService): void {
+      const { habits: demoHabits, completions: demoCompletions } = generateDemoData()
+
+      for (const demoHabit of demoHabits) {
+        // Skip if a demo habit with this id already exists (idempotent)
+        if (!this.habits.find((h) => h.id === demoHabit.id)) {
+          this.habits.push(demoHabit)
+        }
+        // Merge completions — never touch non-demo completion arrays
+        if (!this.completions[demoHabit.id]) {
+          this.completions[demoHabit.id] = demoCompletions[demoHabit.id] ?? []
+        }
+      }
+
+      this.persist(storage)
+    },
+
+    /**
+     * Removes all habits flagged with isDemo and their completion history.
+     * Real habits and completions are untouched.
+     */
+    removeDemoData(storage: IStorageService = localStorageService): void {
+      const demoIds = this.habits.filter((h) => h.isDemo).map((h) => h.id)
+
+      this.habits = this.habits.filter((h) => !h.isDemo)
+      for (const id of demoIds) {
+        delete this.completions[id]
+      }
+
+      this.persist(storage)
+    },
   }
 })
