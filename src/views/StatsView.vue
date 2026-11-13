@@ -8,7 +8,7 @@ import {
   calculateHabitStats,
   calculateWeeklyStats,
   calculateDayOfWeekStats,
-  type HabitStats,
+  type HabitStats
 } from '@/utils/statsCalculator'
 import {
   Chart as ChartJS,
@@ -19,7 +19,7 @@ import {
   CategoryScale,
   LinearScale,
   type ChartData,
-  type ChartOptions,
+  type ChartOptions
 } from 'chart.js'
 import { Bar } from 'vue-chartjs'
 
@@ -37,10 +37,7 @@ const completions = computed(() => habitStore.completions)
 
 // Check if there is any completion history
 const totalCompletionsCount = computed(() => {
-  return Object.values(completions.value).reduce(
-    (total, dates) => total + (dates?.length || 0),
-    0
-  )
+  return Object.values(completions.value).reduce((total, dates) => total + (dates?.length || 0), 0)
 })
 
 const hasHistory = computed(() => {
@@ -61,9 +58,7 @@ const overallSummary = computed(() => {
 })
 
 const perHabitStats = computed<HabitStats[]>(() => {
-  return habits.value.map((h) =>
-    calculateHabitStats(h, completions.value[h.id] || [])
-  )
+  return habits.value.map((h) => calculateHabitStats(h, completions.value[h.id] || []))
 })
 
 const weeklyData = computed(() => {
@@ -88,15 +83,15 @@ const weeklyChartData = computed<ChartData<'bar'>>(() => {
         label: 'Completed',
         data: weeklyData.value.map((w) => w.completed),
         backgroundColor: '#6366f1',
-        borderRadius: 4,
+        borderRadius: 4
       },
       {
         label: 'Missed',
         data: weeklyData.value.map((w) => w.missed),
         backgroundColor: missedBarColor.value,
-        borderRadius: 4,
-      },
-    ],
+        borderRadius: 4
+      }
+    ]
   }
 })
 
@@ -109,8 +104,8 @@ const weeklyChartOptions = computed<ChartOptions<'bar'>>(() => {
         position: 'top',
         labels: {
           color: isDark.value ? '#e5e7eb' : '#374151',
-          boxWidth: 12,
-        },
+          boxWidth: 12
+        }
       },
       tooltip: {
         callbacks: {
@@ -118,22 +113,22 @@ const weeklyChartOptions = computed<ChartOptions<'bar'>>(() => {
             const idx = items[0]?.dataIndex ?? 0
             const item = weeklyData.value[idx]
             return item ? `Rate: ${item.rate}%` : ''
-          },
-        },
-      },
+          }
+        }
+      }
     },
     scales: {
       x: {
         stacked: true,
         grid: { color: gridColor.value },
-        ticks: { color: textColor.value, font: { size: 11 } },
+        ticks: { color: textColor.value, font: { size: 11 } }
       },
       y: {
         stacked: true,
         grid: { color: gridColor.value },
-        ticks: { color: textColor.value, precision: 0 },
-      },
-    },
+        ticks: { color: textColor.value, precision: 0 }
+      }
+    }
   }
 })
 
@@ -146,9 +141,9 @@ const dayOfWeekChartData = computed<ChartData<'bar'>>(() => {
         label: 'Completion Rate (%)',
         data: dayOfWeekData.value.map((d) => d.rate),
         backgroundColor: '#10b981',
-        borderRadius: 6,
-      },
-    ],
+        borderRadius: 6
+      }
+    ]
   }
 })
 
@@ -158,18 +153,18 @@ const dayOfWeekChartOptions = computed<ChartOptions<'bar'>>(() => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false,
+        display: false
       },
       tooltip: {
         callbacks: {
-          label: (item) => `Rate: ${item.parsed.y}%`,
-        },
-      },
+          label: (item) => `Rate: ${item.parsed.y}%`
+        }
+      }
     },
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: textColor.value },
+        ticks: { color: textColor.value }
       },
       y: {
         min: 0,
@@ -177,10 +172,10 @@ const dayOfWeekChartOptions = computed<ChartOptions<'bar'>>(() => {
         grid: { color: gridColor.value },
         ticks: {
           color: textColor.value,
-          callback: (value) => `${value}%`,
-        },
-      },
-    },
+          callback: (value) => `${value}%`
+        }
+      }
+    }
   }
 })
 
@@ -191,9 +186,7 @@ const accessibleSummary = computed(() => {
   }
   const summary = overallSummary.value
   const habitFilterText =
-    selectedHabitId.value === 'all'
-      ? `all ${habits.value.length} habits`
-      : `selected habit`
+    selectedHabitId.value === 'all' ? `all ${habits.value.length} habits` : `selected habit`
   return `Statistics overview for ${habitFilterText}. Over the last 30 days, your overall completion rate is ${summary.overallRate30}%. Your all-time best streak is ${summary.bestStreak} days. ${summary.habitsOnTrack} habits are currently on track, and ${summary.habitsStruggling} habits are struggling.`
 })
 
@@ -234,14 +227,15 @@ function handleLoadDemoData() {
       v-if="!hasHistory"
       class="bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-800 p-8 sm:p-12 text-center"
     >
-      <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-3xl">
+      <div
+        class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-3xl"
+      >
         📊
       </div>
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-        No habit history yet
-      </h3>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No habit history yet</h3>
       <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-        Track your habits on the Today view or load demo data to explore rich charts, completion rates, and streak analysis immediately.
+        Track your habits on the Today view or load demo data to explore rich charts, completion
+        rates, and streak analysis immediately.
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
         <button
@@ -278,23 +272,29 @@ function handleLoadDemoData() {
       <!-- Summary Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Overall 30d Rate -->
-        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-          <span class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <div
+          class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm"
+        >
+          <span
+            class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+          >
             30-Day Rate
           </span>
           <div class="mt-2 flex items-baseline gap-2">
             <span class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               {{ overallSummary.overallRate30 }}%
             </span>
-            <span class="text-xs text-gray-400">
-              (90d: {{ overallSummary.overallRate90 }}%)
-            </span>
+            <span class="text-xs text-gray-400"> (90d: {{ overallSummary.overallRate90 }}%) </span>
           </div>
         </div>
 
         <!-- Best Streak -->
-        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-          <span class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <div
+          class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm"
+        >
+          <span
+            class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+          >
             Best Streak
           </span>
           <div class="mt-2 flex items-baseline gap-1.5">
@@ -307,8 +307,12 @@ function handleLoadDemoData() {
         </div>
 
         <!-- Habits on Track -->
-        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-          <span class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <div
+          class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm"
+        >
+          <span
+            class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+          >
             On Track (≥70%)
           </span>
           <div class="mt-2 flex items-baseline gap-1.5">
@@ -320,8 +324,12 @@ function handleLoadDemoData() {
         </div>
 
         <!-- Habits Struggling -->
-        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-          <span class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <div
+          class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm"
+        >
+          <span
+            class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+          >
             Struggling (&lt;50%)
           </span>
           <div class="mt-2 flex items-baseline gap-1.5">
@@ -336,7 +344,9 @@ function handleLoadDemoData() {
       <!-- Charts Section -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Stacked Bar Chart: Weekly Performance -->
-        <div class="bg-white dark:bg-gray-900 p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div
+          class="bg-white dark:bg-gray-900 p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm"
+        >
           <div class="mb-4">
             <h2 class="text-base font-semibold text-gray-900 dark:text-white">
               Weekly Performance (Last 12 Weeks)
@@ -351,7 +361,9 @@ function handleLoadDemoData() {
         </div>
 
         <!-- Bar Chart: Day of Week Completion Rate -->
-        <div class="bg-white dark:bg-gray-900 p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div
+          class="bg-white dark:bg-gray-900 p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm"
+        >
           <div class="mb-4">
             <h2 class="text-base font-semibold text-gray-900 dark:text-white">
               Completion by Day of the Week
@@ -367,11 +379,11 @@ function handleLoadDemoData() {
       </div>
 
       <!-- Per-Habit Breakdown Table -->
-      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+      <div
+        class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden"
+      >
         <div class="p-5 sm:p-6 border-b border-gray-200 dark:border-gray-800">
-          <h2 class="text-base font-semibold text-gray-900 dark:text-white">
-            Habit Breakdown
-          </h2>
+          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Habit Breakdown</h2>
           <p class="text-xs text-gray-500 dark:text-gray-400">
             Completion rates and streaks per habit
           </p>
@@ -379,7 +391,9 @@ function handleLoadDemoData() {
 
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm" role="table">
-            <thead class="bg-gray-50 dark:bg-gray-800/60 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <thead
+              class="bg-gray-50 dark:bg-gray-800/60 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400"
+            >
               <tr>
                 <th scope="col" class="py-3.5 px-4 sm:px-6">Habit</th>
                 <th scope="col" class="py-3.5 px-4 text-center">7 Days</th>
@@ -396,7 +410,7 @@ function handleLoadDemoData() {
                 class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors"
                 :class="{
                   'bg-indigo-50/30 dark:bg-indigo-950/20 font-medium':
-                    selectedHabitId === stat.habitId,
+                    selectedHabitId === stat.habitId
                 }"
               >
                 <!-- Habit Name & Emoji -->
@@ -406,7 +420,10 @@ function handleLoadDemoData() {
                     <span class="text-gray-900 dark:text-white font-medium block truncate">
                       {{ stat.name }}
                     </span>
-                    <span v-if="stat.isDemo" class="text-[10px] text-indigo-500 uppercase tracking-wider">
+                    <span
+                      v-if="stat.isDemo"
+                      class="text-[10px] text-indigo-500 uppercase tracking-wider"
+                    >
                       Demo
                     </span>
                   </div>
@@ -458,7 +475,9 @@ function handleLoadDemoData() {
 
                 <!-- Best Streak -->
                 <td class="py-3.5 px-4 sm:px-6 text-center">
-                  <span class="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-semibold">
+                  <span
+                    class="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-semibold"
+                  >
                     {{ stat.bestStreak }}d
                     <span class="text-xs">🔥</span>
                   </span>

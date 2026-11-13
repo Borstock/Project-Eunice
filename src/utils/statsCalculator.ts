@@ -6,11 +6,7 @@
  */
 
 import type { Habit } from '@/models/habit'
-import {
-  getTodayDateString,
-  getPastDates,
-  parseIsoDate,
-} from '@/utils/date'
+import { getTodayDateString, getPastDates, parseIsoDate } from '@/utils/date'
 import { calculateCurrentStreak, calculateBestStreak } from '@/utils/streak'
 
 export interface HabitStats {
@@ -37,7 +33,7 @@ export interface PeriodCompletion {
 
 export interface DayOfWeekStat {
   dayIndex: number // 0 = Monday, ... 6 = Sunday
-  dayName: string  // 'Mon', 'Tue', etc.
+  dayName: string // 'Mon', 'Tue', etc.
   completed: number
   total: number
   rate: number
@@ -97,7 +93,7 @@ export function calculateHabitStats(
     rate90: calculateHabitCompletionRate(completedSet, 90, referenceDate),
     currentStreak: calculateCurrentStreak(completedSet, referenceDate),
     bestStreak: calculateBestStreak(completions),
-    totalCompletions: completions.length,
+    totalCompletions: completions.length
   }
 }
 
@@ -140,7 +136,7 @@ export function calculateWeeklyStats(
       completed,
       missed,
       total: expected,
-      rate,
+      rate
     })
   }
 
@@ -169,8 +165,7 @@ export function calculateMonthlyStats(
 
     // Determine days in that month
     const daysInMonth = new Date(year, month + 1, 0).getDate()
-    const isCurrentMonth =
-      year === refDate.getFullYear() && month === refDate.getMonth()
+    const isCurrentMonth = year === refDate.getFullYear() && month === refDate.getMonth()
     const daysToCount = isCurrentMonth ? refDate.getDate() : daysInMonth
 
     const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`
@@ -196,7 +191,7 @@ export function calculateMonthlyStats(
       completed,
       missed,
       total: expected,
-      rate,
+      rate
     })
   }
 
@@ -247,7 +242,7 @@ export function calculateDayOfWeekStats(
       dayName,
       completed,
       total: totalExpected,
-      rate,
+      rate
     }
   })
 }
@@ -269,7 +264,7 @@ export function calculateOverallSummary(
       habitsOnTrack: 0,
       habitsStruggling: 0,
       bestHabits: [],
-      worstHabits: [],
+      worstHabits: []
     }
   }
 
@@ -298,6 +293,6 @@ export function calculateOverallSummary(
     habitsOnTrack,
     habitsStruggling,
     bestHabits,
-    worstHabits,
+    worstHabits
   }
 }

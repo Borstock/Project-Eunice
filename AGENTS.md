@@ -196,3 +196,13 @@ When acting as an AI assistant in this repository:
 4. Keep commit messages compliant with the Conventional Commits format.
 5. Create markdown links to any referenced files using `[filename](file:///c:/Users/David/Desktop/Project-Eunice/path/to/file)`.
 6. Ask the user for confirmation when proposing significant structural changes or before kicking off major implementation phases.
+
+---
+
+## Mandatory Code Formatting Rules
+
+- Always run Prettier on modified source files before completing a task.
+- Always run `pnpm run format` to verify the entire source directory.
+- Fix all formatting issues before considering a task complete.
+- Never report a task as complete if formatting checks fail.
+- Include the formatting check result in the final task summary.
