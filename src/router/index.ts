@@ -18,6 +18,11 @@ const router = createRouter({
       component: () => import('@/views/WeeklyView.vue')
     },
     {
+      path: '/stats',
+      name: 'stats',
+      component: () => import('@/views/StatsView.vue')
+    },
+    {
       path: '/habits',
       name: 'habits',
       component: () => import('@/views/HabitsView.vue')

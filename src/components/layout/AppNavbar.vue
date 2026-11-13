@@ -8,6 +8,7 @@ const route = useRoute()
 const navItems = [
   { name: 'Today', path: '/today' },
   { name: 'Weekly', path: '/weekly' },
+  { name: 'Stats', path: '/stats' },
   { name: 'Manage Habits', path: '/habits' },
   { name: 'Settings', path: '/settings' }
 ]
@@ -88,6 +89,19 @@ function isActive(path: string): boolean {
     >
       <span class="text-base mb-0.5">📊</span>
       <span>Weekly</span>
+    </RouterLink>
+
+    <RouterLink
+      to="/stats"
+      class="flex flex-col items-center py-1 px-3 rounded-lg text-xs font-medium transition-colors"
+      :class="
+        isActive('/stats')
+          ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+          : 'text-gray-500 dark:text-gray-400'
+      "
+    >
+      <span class="text-base mb-0.5">📈</span>
+      <span>Stats</span>
     </RouterLink>
 
     <RouterLink

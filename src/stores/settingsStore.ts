@@ -15,6 +15,14 @@ export const useSettingsStore = defineStore('settings', {
     theme: 'system'
   }),
 
+  getters: {
+    isDark(state): boolean {
+      if (typeof window === 'undefined') return false
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      return state.theme === 'dark' || (state.theme === 'system' && prefersDark)
+    }
+  },
+
   actions: {
     async initTheme(storage: IStorageService = localStorageService): Promise<void> {
       const savedTheme = await storage.getItem<ThemeMode>(THEME_STORAGE_KEY)
