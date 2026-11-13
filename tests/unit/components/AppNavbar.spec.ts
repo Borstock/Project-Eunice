@@ -14,7 +14,9 @@ describe('AppNavbar.vue', () => {
       routes: [
         { path: '/today', component: { template: '<div>Today</div>' } },
         { path: '/weekly', component: { template: '<div>Weekly</div>' } },
-        { path: '/habits', component: { template: '<div>Habits</div>' } }
+        { path: '/stats', component: { template: '<div>Stats</div>' } },
+        { path: '/habits', component: { template: '<div>Habits</div>' } },
+        { path: '/settings', component: { template: '<div>Settings</div>' } }
       ]
     })
     await router.push('/today')
@@ -34,6 +36,8 @@ describe('AppNavbar.vue', () => {
     expect(wrapper.text()).toContain('Habit Tracker')
     expect(wrapper.text()).toContain('Today')
     expect(wrapper.text()).toContain('Weekly')
+    expect(wrapper.text()).toContain('Stats')
     expect(wrapper.text()).toContain('Manage Habits')
+    expect(wrapper.text()).toContain('Settings')
   })
 })

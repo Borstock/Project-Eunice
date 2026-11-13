@@ -237,19 +237,23 @@ Project-Eunice/
 ## Roadmap
 
 ### Phase 1: MVP (Current)
-- [x] Project architecture and documentation setup (`README.md`, `AGENTS.md`, CI/CD, Docker).
-- [ ] Habit CRUD: Create, edit, and delete habits (name, emoji/icon, color).
-- [ ] "Today" View: Display today's habits with quick one-click completion toggle.
-- [ ] Streak Tracking: Automatic calculation of current consecutive completion streak.
-- [ ] Weekly / Calendar View: Visual grid indicating days completed for each habit.
-- [ ] Decoupled Local Storage: Browser-backed persistence surviving reloads.
-- [ ] Responsive Layout: Mobile-first interface with system/light/dark mode toggle.
+- [x] Project architecture and documentation setup (README.md, AGENTS.md, CI/CD, Docker).
+- [x] Habit CRUD: Create, edit, and delete habits (name, emoji/icon, color).
+- [x] "Today" View: Display today's habits with quick one-click completion toggle.
+- [x] Streak Tracking: Automatic calculation of current consecutive completion streak.
+- [x] Weekly / Calendar View: Visual grid indicating days completed for each habit.
+- [x] Decoupled Local Storage: Browser-backed persistence surviving reloads.
+- [x] Responsive Layout: Mobile-first interface with system/light/dark mode toggle.
+- [x] Environment Variables: Centralized typed configuration module (VITE_*).
+- [x] Demo Data: Deterministic 90-day history with 5 habit patterns and settings controls.
+- [x] Stats and Charts: Lazy-loaded statistics view with Chart.js + vue-chartjs visualizations.
 - [ ] Deployment & Verification: Production deployment on Vercel with automated CI passing.
 
 ### Phase 2: Upcoming Features (Architecture Ready)
-- [ ] **Stats and Charts:** Completion rates, best streaks, weekly and monthly evolution graphs using `Chart.js` + `vue-chartjs`.
+- [x] **Stats and Charts:** Completion rates, best streaks, weekly and monthly evolution graphs using Chart.js + ue-chartjs.
+- [x] **Demo Data Generator:** Instant realistic statistics without weeks of manual tracking.
 - [ ] **Custom Frequencies & Quantities:** Specific weekday schedules, "X times per week" targets, and numeric targets (e.g., 8 glasses of water).
-- [ ] **Reminders & PWA Support:** Browser notifications at configured times and offline installation via `vite-plugin-pwa`.
+- [ ] **Reminders & PWA Support:** Browser notifications at configured times and offline installation via ite-plugin-pwa.
 - [ ] **Data Portability & Sync:** JSON/CSV data backup, export, and import; optional cloud sync via free-tier provider (e.g. Supabase / Firebase).
 
 ---
