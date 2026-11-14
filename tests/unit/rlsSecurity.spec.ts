@@ -123,5 +123,32 @@ describe('Data Security & RLS Policy Verification', () => {
       )
       expect(sql).toMatch(/user_id UUID NOT NULL REFERENCES auth\.users\(id\) ON DELETE CASCADE/i)
     })
+
+    it('grants required CRUD privileges to authenticated role on habits and completions', () => {
+      expect(sql).toContain(
+        'GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.habits TO authenticated;'
+      )
+      expect(sql).toContain(
+        'GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.completions TO authenticated;'
+      )
+    })
+
+    it('verifies 002_grants.sql exists and contains valid grants for authenticated role', () => {
+      const grantsMigrationPath = path.resolve(
+        __dirname,
+        '../../supabase/migrations/002_grants.sql'
+      )
+      expect(fs.existsSync(grantsMigrationPath)).toBe(true)
+      const grantsSql = fs.readFileSync(grantsMigrationPath, 'utf8')
+      expect(grantsSql).toContain('GRANT USAGE ON SCHEMA public TO authenticated;')
+      expect(grantsSql).toContain(
+        'GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.habits TO authenticated;'
+      )
+      expect(grantsSql).toContain(
+        'GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.completions TO authenticated;'
+      )
+      // Confirm anon is NOT granted privileges
+      expect(grantsSql).not.toContain('TO anon;')
+    })
   })
 })

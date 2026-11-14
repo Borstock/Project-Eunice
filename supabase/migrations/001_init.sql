@@ -136,3 +136,9 @@ CREATE TRIGGER set_habits_updated_at
     BEFORE UPDATE ON public.habits
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_updated_at();
+
+-- 8. Table privileges for authenticated users
+-- Grants table access to the authenticated role while RLS enforces user data isolation
+GRANT USAGE ON SCHEMA public TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.habits TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.completions TO authenticated;
