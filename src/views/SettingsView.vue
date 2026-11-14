@@ -9,43 +9,72 @@ const habitStore = useHabitStore()
 const authStore = useAuthStore()
 
 // ── confirmation dialog state ──────────────────────────────────────────────
-type DialogAction = 'load' | 'remove' | null
+type DialogAction = 'load' | 'remove' | 'deleteCloud' | null
 const pendingAction = ref<DialogAction>(null)
+const actionError = ref<string | null>(null)
 
 function requestAction(action: DialogAction) {
+  actionError.value = null
   pendingAction.value = action
 }
 
 function cancelAction() {
   pendingAction.value = null
+  actionError.value = null
 }
 
-function confirmAction() {
+async function confirmAction() {
+  actionError.value = null
   if (pendingAction.value === 'load') {
     habitStore.loadDemoData()
   } else if (pendingAction.value === 'remove') {
     habitStore.removeDemoData()
+  } else if (pendingAction.value === 'deleteCloud') {
+    try {
+      await habitStore.deleteCloudData()
+    } catch (err) {
+      actionError.value = (err as Error).message || 'Failed to delete cloud data.'
+      return
+    }
   }
   pendingAction.value = null
 }
 
 async function handleSignOut() {
   await authStore.signOut()
+  await habitStore.initStore()
   router.push('/today')
 }
 
 // ── derived state ──────────────────────────────────────────────────────────
 const hasDemoData = computed(() => habitStore.hasDemoData())
 
-const dialogTitle = computed(() =>
-  pendingAction.value === 'load' ? 'Load demo data?' : 'Remove demo data?'
-)
+const dialogTitle = computed(() => {
+  if (pendingAction.value === 'load') return 'Load demo data?'
+  if (pendingAction.value === 'remove') return 'Remove demo data?'
+  if (pendingAction.value === 'deleteCloud') return 'Delete all cloud data?'
+  return ''
+})
 
-const dialogBody = computed(() =>
-  pendingAction.value === 'load'
-    ? 'This will add 5 demo habits with 90 days of history. Your real habits are never touched.'
-    : 'This will permanently delete the 5 demo habits and their history. Your real habits are untouched.'
-)
+const dialogBody = computed(() => {
+  if (pendingAction.value === 'load') {
+    return 'This will add 5 demo habits with 90 days of history. Your real habits are never touched.'
+  }
+  if (pendingAction.value === 'remove') {
+    return 'This will permanently delete the 5 demo habits and their history. Your real habits are untouched.'
+  }
+  if (pendingAction.value === 'deleteCloud') {
+    return 'This will permanently delete all your habits and completion records from the cloud. Your account remains active, but all stored habits will be erased. This action cannot be undone.'
+  }
+  return ''
+})
+
+const confirmButtonText = computed(() => {
+  if (pendingAction.value === 'load') return 'Load'
+  if (pendingAction.value === 'remove') return 'Remove'
+  if (pendingAction.value === 'deleteCloud') return 'Delete all data'
+  return 'Confirm'
+})
 </script>
 
 <template>
@@ -93,15 +122,24 @@ const dialogBody = computed(() =>
           </p>
         </div>
 
-        <div>
+        <div class="flex flex-wrap items-center gap-3 pt-1">
           <button
             type="button"
             :disabled="authStore.loading"
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-950/70 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
             @click="handleSignOut"
           >
             <span>🚪</span>
             Log out
+          </button>
+
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+            @click="requestAction('deleteCloud')"
+          >
+            <span>🗑️</span>
+            Delete all my cloud data
           </button>
         </div>
       </div>
@@ -198,6 +236,14 @@ const dialogBody = computed(() =>
             {{ dialogBody }}
           </p>
 
+          <div
+            v-if="actionError"
+            role="alert"
+            class="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-300"
+          >
+            {{ actionError }}
+          </div>
+
           <div class="flex justify-end gap-3 pt-2">
             <button
               class="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
@@ -214,7 +260,7 @@ const dialogBody = computed(() =>
               "
               @click="confirmAction"
             >
-              {{ pendingAction === 'load' ? 'Load' : 'Remove' }}
+              {{ confirmButtonText }}
             </button>
           </div>
         </div>

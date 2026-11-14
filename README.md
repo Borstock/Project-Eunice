@@ -312,8 +312,8 @@ Project-Eunice/
 ### Phase 2: Accounts & Cloud Sync
 
 - [x] **Database Schema & RLS:** Postgres migration with `habits` and `completions` tables protected by RLS (`001_init.sql`).
-- [ ] **Supabase Auth:** Email & password authentication with reactive Pinia auth store.
-- [ ] **Cloud Sync & Migration:** Repository adapter syncing with Supabase and migrating local guest habits.
+- [x] **Supabase Auth:** Email & password authentication with reactive Pinia auth store, session restore, router guards, and friendly auth error handling.
+- [x] **Cloud Sync & Migration:** Repository adapter syncing with Supabase, optimistic UI updates with reactive sync badge, safe first-login local data migration, and cloud data deletion.
 - [ ] **Custom Frequencies & Quantities:** Specific weekday schedules and numeric targets.
 - [ ] **Reminders & PWA Support:** Browser notifications and offline installation.
 

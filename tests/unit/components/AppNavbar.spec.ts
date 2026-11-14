@@ -5,6 +5,7 @@ import { createRouter, createMemoryHistory } from 'vue-router'
 import type { User } from '@supabase/supabase-js'
 import AppNavbar from '@/components/layout/AppNavbar.vue'
 import { useAuthStore } from '@/stores/authStore'
+import { useHabitStore } from '@/stores/habitStore'
 
 describe('AppNavbar.vue', () => {
   let router: ReturnType<typeof createRouter>
@@ -77,5 +78,34 @@ describe('AppNavbar.vue', () => {
 
     await logoutBtn?.trigger('click')
     expect(signOutSpy).toHaveBeenCalled()
+  })
+
+  it('renders sync status when authenticated', async () => {
+    const authStore = useAuthStore()
+    authStore.user = { id: 'u-1', email: 'alice@example.com' } as unknown as User
+    const habitStore = useHabitStore()
+    habitStore.syncStatus = 'syncing'
+
+    const wrapper = mount(AppNavbar, {
+      global: {
+        plugins: [router],
+        stubs: { ThemeToggle: true }
+      }
+    })
+
+    expect(wrapper.text()).toContain('Syncing...')
+
+    habitStore.migrationPromptOpen = true
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('Migration pending')
+    habitStore.migrationPromptOpen = false
+
+    habitStore.syncStatus = 'error'
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('Sync error (Retry)')
+
+    habitStore.syncStatus = 'synced'
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('Synced')
   })
 })

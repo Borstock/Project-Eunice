@@ -2,9 +2,11 @@
 import { ref } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useHabitStore } from '@/stores/habitStore'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const habitStore = useHabitStore()
 
 const email = ref('')
 const password = ref('')
@@ -26,6 +28,7 @@ async function handleLogin() {
 
   const result = await authStore.signIn(email.value, password.value)
   if (result.success) {
+    await habitStore.initStore()
     router.push('/today')
   } else if (result.error) {
     localError.value = result.error

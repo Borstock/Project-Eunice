@@ -60,6 +60,32 @@ describe('SettingsView.vue', () => {
     wrapper.unmount()
   })
 
+  it('confirms and deletes all cloud data when authenticated', async () => {
+    const authStore = useAuthStore()
+    authStore.user = { id: 'u-1', email: 'user@example.com' } as unknown as User
+    const habitStore = useHabitStore()
+    const deleteSpy = vi.spyOn(habitStore, 'deleteCloudData').mockResolvedValueOnce()
+
+    const wrapper = mountSettings()
+    const deleteBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Delete all my cloud data'))
+    expect(deleteBtn).toBeDefined()
+    await deleteBtn?.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect(document.body.textContent).toContain('Delete all cloud data?')
+
+    const confirmBtn = Array.from(document.body.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === 'Delete all data'
+    )
+    confirmBtn?.click()
+    await wrapper.vm.$nextTick()
+
+    expect(deleteSpy).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
   it('shows "Load demo data" button when no demo data is loaded', () => {
     const wrapper = mountSettings()
     const buttons = wrapper.findAll('button')

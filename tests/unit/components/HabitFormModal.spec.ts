@@ -34,7 +34,11 @@ describe('HabitFormModal.vue', () => {
     await wrapper.find('form').trigger('submit.prevent')
 
     expect(wrapper.emitted('save')).toBeTruthy()
-    const payload = wrapper.emitted('save')?.[0]?.[0] as { name: string; emoji: string; color: string }
+    const payload = wrapper.emitted('save')?.[0]?.[0] as {
+      name: string
+      emoji: string
+      color: string
+    }
     expect(payload.name).toBe('Morning Walk')
     expect(payload.emoji).toBeDefined()
     expect(payload.color).toBeDefined()
