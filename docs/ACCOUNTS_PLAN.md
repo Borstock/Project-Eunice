@@ -70,12 +70,26 @@ TO authenticated
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
--- Completions Policies
+-- Completions Policies (verifies user owns completion and referenced habit)
 CREATE POLICY "Users can manage own completions"
 ON public.completions FOR ALL
 TO authenticated
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
+USING (
+    auth.uid() = user_id
+    AND EXISTS (
+        SELECT 1 FROM public.habits
+        WHERE habits.id = completions.habit_id
+          AND habits.user_id = auth.uid()
+    )
+)
+WITH CHECK (
+    auth.uid() = user_id
+    AND EXISTS (
+        SELECT 1 FROM public.habits
+        WHERE habits.id = completions.habit_id
+          AND habits.user_id = auth.uid()
+    )
+);
 ```
 
 ---

@@ -61,30 +61,66 @@ CREATE POLICY "Users can delete own habits"
     USING (auth.uid() = user_id);
 
 -- 6. RLS Policies for completions
+-- Ensures user owns both the completion row and the referenced habit
 DROP POLICY IF EXISTS "Users can select own completions" ON public.completions;
 CREATE POLICY "Users can select own completions"
     ON public.completions FOR SELECT
     TO authenticated
-    USING (auth.uid() = user_id);
+    USING (
+        auth.uid() = user_id
+        AND EXISTS (
+            SELECT 1 FROM public.habits
+            WHERE habits.id = completions.habit_id
+              AND habits.user_id = auth.uid()
+        )
+    );
 
 DROP POLICY IF EXISTS "Users can insert own completions" ON public.completions;
 CREATE POLICY "Users can insert own completions"
     ON public.completions FOR INSERT
     TO authenticated
-    WITH CHECK (auth.uid() = user_id);
+    WITH CHECK (
+        auth.uid() = user_id
+        AND EXISTS (
+            SELECT 1 FROM public.habits
+            WHERE habits.id = completions.habit_id
+              AND habits.user_id = auth.uid()
+        )
+    );
 
 DROP POLICY IF EXISTS "Users can update own completions" ON public.completions;
 CREATE POLICY "Users can update own completions"
     ON public.completions FOR UPDATE
     TO authenticated
-    USING (auth.uid() = user_id)
-    WITH CHECK (auth.uid() = user_id);
+    USING (
+        auth.uid() = user_id
+        AND EXISTS (
+            SELECT 1 FROM public.habits
+            WHERE habits.id = completions.habit_id
+              AND habits.user_id = auth.uid()
+        )
+    )
+    WITH CHECK (
+        auth.uid() = user_id
+        AND EXISTS (
+            SELECT 1 FROM public.habits
+            WHERE habits.id = completions.habit_id
+              AND habits.user_id = auth.uid()
+        )
+    );
 
 DROP POLICY IF EXISTS "Users can delete own completions" ON public.completions;
 CREATE POLICY "Users can delete own completions"
     ON public.completions FOR DELETE
     TO authenticated
-    USING (auth.uid() = user_id);
+    USING (
+        auth.uid() = user_id
+        AND EXISTS (
+            SELECT 1 FROM public.habits
+            WHERE habits.id = completions.habit_id
+              AND habits.user_id = auth.uid()
+        )
+    );
 
 -- 7. Automatic updated_at timestamp trigger for habits
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
