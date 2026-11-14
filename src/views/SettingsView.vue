@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import { useHabitStore } from '@/stores/habitStore'
+import { useAuthStore } from '@/stores/authStore'
 
+const router = useRouter()
 const habitStore = useHabitStore()
+const authStore = useAuthStore()
 
 // ── confirmation dialog state ──────────────────────────────────────────────
 type DialogAction = 'load' | 'remove' | null
@@ -23,6 +27,11 @@ function confirmAction() {
     habitStore.removeDemoData()
   }
   pendingAction.value = null
+}
+
+async function handleSignOut() {
+  await authStore.signOut()
+  router.push('/today')
 }
 
 // ── derived state ──────────────────────────────────────────────────────────
@@ -47,6 +56,80 @@ const dialogBody = computed(() =>
         Manage your Habit Tracker preferences.
       </p>
     </div>
+
+    <!-- Account & Cloud Sync Section -->
+    <section
+      class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 space-y-4"
+    >
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Account & Cloud Sync</h2>
+        <span
+          v-if="authStore.isAuthenticated"
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-300"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+          Cloud Sync Enabled
+        </span>
+        <span
+          v-else
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          Using local data only
+        </span>
+      </div>
+
+      <!-- Authenticated Details -->
+      <div v-if="authStore.isAuthenticated" class="space-y-4">
+        <div>
+          <p class="text-sm text-gray-600 dark:text-gray-300">
+            Signed in as
+            <strong class="font-semibold text-gray-900 dark:text-white">
+              {{ authStore.userEmail }}
+            </strong>
+          </p>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Your habits and history are stored securely in the cloud under your account.
+          </p>
+        </div>
+
+        <div>
+          <button
+            type="button"
+            :disabled="authStore.loading"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-950/70 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+            @click="handleSignOut"
+          >
+            <span>🚪</span>
+            Log out
+          </button>
+        </div>
+      </div>
+
+      <!-- Guest Details -->
+      <div v-else class="space-y-4">
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          You are currently tracking habits in guest mode. Your data is stored only in this
+          browser's local storage.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-3">
+          <RouterLink
+            to="/signup"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors shadow-sm"
+          >
+            <span>✨</span>
+            Create free account
+          </RouterLink>
+          <RouterLink
+            to="/login"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+          >
+            Sign in
+          </RouterLink>
+        </div>
+      </div>
+    </section>
 
     <!-- Demo Data Section -->
     <section
@@ -100,22 +183,20 @@ const dialogBody = computed(() =>
     <Teleport to="body">
       <div
         v-if="pendingAction !== null"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="'dialog-title'"
       >
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/40 dark:bg-black/60" @click="cancelAction" />
-
-        <!-- Panel -->
         <div
-          class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-sm p-6 space-y-4"
+          class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl max-w-md w-full p-6 space-y-4"
         >
-          <h3 id="dialog-title" class="text-base font-semibold text-gray-900 dark:text-white">
+          <h3 id="dialog-title" class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ dialogTitle }}
           </h3>
-          <p class="text-sm text-gray-600 dark:text-gray-300">{{ dialogBody }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            {{ dialogBody }}
+          </p>
 
           <div class="flex justify-end gap-3 pt-2">
             <button
@@ -125,15 +206,15 @@ const dialogBody = computed(() =>
               Cancel
             </button>
             <button
-              class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2"
+              class="px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2"
               :class="
-                pendingAction === 'remove'
-                  ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
-                  : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
+                pendingAction === 'load'
+                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500'
+                  : 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
               "
               @click="confirmAction"
             >
-              {{ pendingAction === 'remove' ? 'Remove' : 'Load' }}
+              {{ pendingAction === 'load' ? 'Load' : 'Remove' }}
             </button>
           </div>
         </div>

@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ThemeToggle from './ThemeToggle.vue'
 import { APP_NAME } from '@/config/env'
+import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
 
 const navItems = [
   { name: 'Today', path: '/today' },
@@ -15,6 +18,11 @@ const navItems = [
 
 function isActive(path: string): boolean {
   return route?.path === path
+}
+
+async function handleSignOut() {
+  await authStore.signOut()
+  router.push('/today')
 }
 </script>
 
@@ -53,8 +61,35 @@ function isActive(path: string): boolean {
           </RouterLink>
         </nav>
 
-        <!-- Theme Toggle -->
+        <!-- Actions: Auth Status & Theme Toggle -->
         <div class="flex items-center space-x-2">
+          <!-- Authenticated State -->
+          <div v-if="authStore.isAuthenticated" class="flex items-center space-x-2">
+            <span
+              class="hidden sm:inline-block text-xs font-medium text-gray-600 dark:text-gray-300 max-w-[130px] truncate"
+              :title="authStore.userEmail ?? ''"
+            >
+              {{ authStore.userEmail }}
+            </span>
+            <button
+              type="button"
+              class="text-xs font-medium px-2.5 py-1.5 rounded-lg text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              @click="handleSignOut"
+            >
+              Log out
+            </button>
+          </div>
+
+          <!-- Guest State -->
+          <div v-else class="flex items-center space-x-2">
+            <RouterLink
+              to="/login"
+              class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors"
+            >
+              Sign in
+            </RouterLink>
+          </div>
+
           <ThemeToggle />
         </div>
       </div>
