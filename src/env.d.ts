@@ -15,6 +15,10 @@ interface ImportMetaEnv {
   readonly VITE_STORAGE_PREFIX?: string
   /** Enable verbose debug logging ("true" / "false", default: "false"). */
   readonly VITE_ENABLE_DEBUG?: string
+  /** Supabase project URL (e.g. https://xyz.supabase.co). */
+  readonly VITE_SUPABASE_URL?: string
+  /** Supabase public anonymous API key. */
+  readonly VITE_SUPABASE_ANON_KEY?: string
 }
 
 interface ImportMeta {

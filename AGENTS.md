@@ -16,26 +16,27 @@ Welcome to **Habit Tracker**. This document establishes the engineering rules, d
 
 ## 2. Tech Stack & Tooling
 
-| Category | Technology | Notes |
-| --- | --- | --- |
-| **Framework** | Vue 3 | Composition API with `<script setup>` syntax |
-| **Language** | TypeScript | Strict mode enabled (`strict: true`) |
-| **Build Tool** | Vite | Lightning-fast HMR and optimized production bundles |
-| **State Management**| Pinia | Typed modular stores |
-| **Routing** | Vue Router 4 | Client-side routing with clean URLs |
-| **Styling** | Tailwind CSS | Utility-first, responsive, dark-mode ready (`darkMode: 'class'`) |
-| **Unit Testing** | Vitest + @vue/test-utils | Fast in-memory testing of stores and components |
-| **E2E Testing** | Playwright | Real browser automation for critical user journeys |
-| **Linting & Formatting** | ESLint + Prettier | Standardized formatting and strict linting rules |
-| **Containerization**| Docker & Docker Compose | Multi-stage build (`node:alpine` -> `nginx:alpine`) |
-| **CI** | GitHub Actions | Automated lint, test, and build workflows on PRs |
-| **Hosting** | Vercel (Hobby Plan) | Automated deployments from `main` and preview branches |
+| Category                 | Technology               | Notes                                                            |
+| ------------------------ | ------------------------ | ---------------------------------------------------------------- |
+| **Framework**            | Vue 3                    | Composition API with `<script setup>` syntax                     |
+| **Language**             | TypeScript               | Strict mode enabled (`strict: true`)                             |
+| **Build Tool**           | Vite                     | Lightning-fast HMR and optimized production bundles              |
+| **State Management**     | Pinia                    | Typed modular stores                                             |
+| **Routing**              | Vue Router 4             | Client-side routing with clean URLs                              |
+| **Styling**              | Tailwind CSS             | Utility-first, responsive, dark-mode ready (`darkMode: 'class'`) |
+| **Unit Testing**         | Vitest + @vue/test-utils | Fast in-memory testing of stores and components                  |
+| **E2E Testing**          | Playwright               | Real browser automation for critical user journeys               |
+| **Linting & Formatting** | ESLint + Prettier        | Standardized formatting and strict linting rules                 |
+| **Containerization**     | Docker & Docker Compose  | Multi-stage build (`node:alpine` -> `nginx:alpine`)              |
+| **CI**                   | GitHub Actions           | Automated lint, test, and build workflows on PRs                 |
+| **Hosting**              | Vercel (Hobby Plan)      | Automated deployments from `main` and preview branches           |
 
 ---
 
 ## 3. Working Rules & Git Workflow
 
 ### 3.1 Branching Strategy
+
 - `main`: **Production branch**. Represents the live, production-ready code deployed to Vercel. Direct commits are forbidden.
 - `develop`: **Integration branch**. Active integration point where completed features merge.
 - `feature/<feature-name>`: **Feature branches**.
@@ -45,7 +46,9 @@ Welcome to **Habit Tracker**. This document establishes the engineering rules, d
 - Hotfixes or bug fixes should use `fix/<issue-name>`.
 
 ### 3.2 Commit Conventions
+
 All commits must strictly follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/):
+
 - `feat: <description>` — New user-facing feature
 - `fix: <description>` — Bug fix
 - `test: <description>` — Adding or correcting tests
@@ -53,16 +56,20 @@ All commits must strictly follow [Conventional Commits](https://www.conventional
 - `docs: <description>` — Documentation changes (README, AGENTS.md, etc.)
 - `chore: <description>` — Build config, package management, tooling changes
 
-*Example:* `feat: add habit creation modal with color and emoji picker`
+_Example:_ `feat: add habit creation modal with color and emoji picker`
 
 ### 3.3 Continuous Testing & Quality Gates
+
 Every code change must satisfy the quality triad prior to merge:
+
 1. **Lint Clean:** `npm run lint` must pass with 0 errors.
 2. **Tests Pass:** `npm run test:unit` must pass 100% of unit and component tests.
 3. **Build Succeeds:** `npm run build` must complete with 0 TypeScript and asset errors.
 
 ### 3.4 Continuous Integration (CI)
+
 A GitHub Actions workflow (`.github/workflows/ci.yml`) automatically triggers on pull requests targeting `main` and `develop`. It executes:
+
 - Node.js setup & dependency cache
 - ESLint verification
 - Vitest unit test suite
@@ -73,45 +80,49 @@ A GitHub Actions workflow (`.github/workflows/ci.yml`) automatically triggers on
 ## 4. Software Architecture & Design Principles
 
 ### 4.1 Storage Abstraction Layer (Hexagonal / Port & Adapter Pattern)
+
 To allow zero-friction transitions in Phase 2 (such as swapping `localStorage` for `IndexedDB` or a cloud-sync adapter like Supabase/Firebase free tiers), the app accesses storage solely via an abstraction interface:
 
 ```typescript
 // src/services/storage/IStorageService.ts
 export interface IStorageService {
-  getItem<T>(key: string): Promise<T | null> | T | null;
-  setItem<T>(key: string, value: T): Promise<void> | void;
-  removeItem(key: string): Promise<void> | void;
-  clear(): Promise<void> | void;
+  getItem<T>(key: string): Promise<T | null> | T | null
+  setItem<T>(key: string, value: T): Promise<void> | void
+  removeItem(key: string): Promise<void> | void
+  clear(): Promise<void> | void
 }
 ```
 
 The domain logic communicates via a repository or service (`HabitRepository`) that relies on this interface, never invoking `localStorage` or `window` directly from Vue components or Pinia actions.
 
 ### 4.2 State Management (Pinia)
+
 - **`useHabitStore`**: Single source of truth for habits, completion records, active date selections, and derived calculations (streaks, today's status).
 - **`useSettingsStore`**: User preferences (theme: light/dark/system).
 - State must remain serializable (plain objects, strings, numbers, arrays).
 
 ### 4.3 Domain Models
+
 ```typescript
 // src/models/habit.ts
 export interface Habit {
-  id: string;              // UUID or timestamp-based unique ID
-  name: string;            // Name of the habit (e.g., "Morning Run")
-  emoji: string;           // Representative emoji (e.g., "🏃")
-  color: string;           // Hex or Tailwind color class (e.g., "#3B82F6")
-  createdAt: string;       // ISO 8601 date string
-  archived?: boolean;      // For soft deletion/archiving
+  id: string // UUID or timestamp-based unique ID
+  name: string // Name of the habit (e.g., "Morning Run")
+  emoji: string // Representative emoji (e.g., "🏃")
+  color: string // Hex or Tailwind color class (e.g., "#3B82F6")
+  createdAt: string // ISO 8601 date string
+  archived?: boolean // For soft deletion/archiving
 }
 
 export interface HabitCompletion {
-  habitId: string;
-  date: string;            // Format: YYYY-MM-DD
-  completedAt: string;     // ISO 8601 timestamp
+  habitId: string
+  date: string // Format: YYYY-MM-DD
+  completedAt: string // ISO 8601 timestamp
 }
 ```
 
 ### 4.4 Streak Calculation Algorithm
+
 - A streak represents the number of consecutive days a habit was completed up to the target evaluation date.
 - Current streak evaluates backwards from today:
   - If completed today: count today + consecutive days immediately preceding today.
@@ -123,17 +134,20 @@ export interface HabitCompletion {
 ## 5. Code Style & Conventions
 
 ### 5.1 Vue 3 Component Conventions
+
 - Use `<script setup lang="ts">`.
 - Declare props with `defineProps<{ ... }>()` and emits with `defineEmits<{ ... }>()`.
 - Keep components small, focused, and single-purpose.
 - Prefer composables (`use*`) for reusable stateful logic (e.g., `useTheme`, `useStreak`).
 
 ### 5.2 TypeScript Standards
+
 - Enable strict type checks (`noImplicitAny: true`, `strictNullChecks: true`).
 - Export shared types and interfaces from `src/models/`.
 - Do not use `any`; use typed generics, unknown, or unions where necessary.
 
 ### 5.3 Tailwind CSS & UI Design
+
 - Mobile-first approach: write mobile classes first, then apply `sm:`, `md:`, `lg:` breakpoints.
 - Dark mode: utilize the `dark:` prefix consistently across all backgrounds, text, and borders.
 - Keep accessible contrast ratios and readable typography.
@@ -148,28 +162,49 @@ Type declarations for the variables live in [`src/env.d.ts`](file:///c:/Users/Da
 
 ### 5.1 Available Variables
 
-| Variable | Default | Description |
-| --- | --- | --- |
-| `VITE_APP_NAME` | `"Habit Tracker"` | Display name in navbar and `<title>`. |
-| `VITE_STORAGE_PREFIX` | `"habit_tracker_"` | Namespace prefix for all `localStorage` keys. Valid chars: `a-z A-Z 0-9 _ -`. Changing it triggers automatic one-time migration of existing data. |
-| `VITE_ENABLE_DEBUG` | `"false"` | Set to `"true"` to enable verbose `console.debug` logging via `src/utils/logger.ts`. |
+| Variable                 | Default            | Description                                                                                                                                       |
+| ------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_APP_NAME`          | `"Habit Tracker"`  | Display name in navbar and `<title>`.                                                                                                             |
+| `VITE_STORAGE_PREFIX`    | `"habit_tracker_"` | Namespace prefix for all `localStorage` keys. Valid chars: `a-z A-Z 0-9 _ -`. Changing it triggers automatic one-time migration of existing data. |
+| `VITE_ENABLE_DEBUG`      | `"false"`          | Set to `"true"` to enable verbose `console.debug` logging via `src/utils/logger.ts`.                                                              |
+| `VITE_SUPABASE_URL`      | `""`               | Supabase project URL (e.g. `https://xyz.supabase.co`). Optional; when omitted, the app runs normally in offline/guest mode.                       |
+| `VITE_SUPABASE_ANON_KEY` | `""`               | Supabase public anonymous API key (safe with RLS). Optional; when omitted, the app runs in guest mode.                                            |
 
-> **⚠️ Security:** `VITE_` variables are compiled into the browser bundle and are publicly visible. **Never store secrets, API keys, or passwords in them.**
+> **⚠️ Security Mandate:** `VITE_` variables are compiled into the browser bundle and are publicly visible. **Never store secrets, API keys, or passwords in them.** The Supabase `anon` key is safe only because Row Level Security (RLS) is enabled everywhere. The `service_role` key must **NEVER** appear anywhere in the frontend or the repository.
 
 ### 5.2 Local Development Setup
+
 ```bash
 cp .env.example .env.local   # .env.local is gitignored
 # Edit .env.local to override only what you need
 ```
 
-### 5.3 Vercel Deployment Setup
-In the Vercel dashboard: **Project Settings → Environment Variables**. Add each `VITE_*` key for the target environments (Production / Preview / Development). Vercel injects them at build time.
+### 5.3 Docker Build Setup
+
+When building the Docker image with Supabase enabled, pass build args:
+
+```bash
+docker build \
+  --build-arg VITE_SUPABASE_URL="https://your-project.supabase.co" \
+  --build-arg VITE_SUPABASE_ANON_KEY="your-anon-key" \
+  -t habit-tracker:latest .
+```
+
+### 5.4 Vercel Deployment Setup
+
+In the Vercel dashboard: **Project Settings → Environment Variables**. Add each `VITE_*` key (`VITE_APP_NAME`, `VITE_STORAGE_PREFIX`, `VITE_ENABLE_DEBUG`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) for the target environments (Production / Preview / Development). Vercel injects them at build time.
+
+> **ℹ️ Supabase Free Tier Notes:**
+>
+> - Projects on the free tier pause automatically after ~7 days of inactivity. If paused, restore via the Supabase dashboard.
+> - Default Supabase email service has a low rate limit (~3-4 confirmation emails/hour). Configure custom SMTP in production if needed.
 
 ---
 
 ## 6. Phase 1 MVP Scope & Phase 2 Extensibility
 
 ### 6.1 Phase 1: MVP Scope
+
 1. **Habit CRUD:** Create, view, edit, and delete habits (name, icon/emoji, color).
 2. **Today View:** View habits scheduled for today; check/uncheck status.
 3. **Current Streak Display:** Dynamic streak calculation for each habit.
@@ -179,7 +214,9 @@ In the Vercel dashboard: **Project Settings → Environment Variables**. Add eac
 7. **Production Ready:** Docker containerization, CI workflow, and deployment ready for Vercel.
 
 ### 6.2 Phase 2 Extensibility Hooks (Design Considerations)
+
 When writing Phase 1 code, ensure the following architecture hooks are preserved:
+
 - **Stats & Charts:** Store completion history as individual date entries (`YYYY-MM-DD`) rather than simple integer counters, so historical trend graphs can be computed without schema migrations.
 - **Frequency & Goals:** Habit models should easily accommodate optional fields like `frequency: { type: 'daily' | 'weekly' | 'custom', targetDays?: number[] }` and `targetQuantity?: number`.
 - **Notifications & PWA:** Structure service worker registration and push notification helpers as isolated composables.
@@ -190,6 +227,7 @@ When writing Phase 1 code, ensure the following architecture hooks are preserved
 ## 7. Instructions for AI Agents
 
 When acting as an AI assistant in this repository:
+
 1. Always verify the current branch and status before making changes.
 2. Ensure any new logic is accompanied by unit tests in `tests/unit/`.
 3. Run `npm run lint` and `npm run test:unit` after generating code to confirm the repository remains clean.

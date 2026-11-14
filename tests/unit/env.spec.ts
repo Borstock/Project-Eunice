@@ -84,6 +84,42 @@ describe('env config', () => {
     })
   })
 
+  describe('SUPABASE config', () => {
+    it('defaults to empty strings and not configured when omitted', async () => {
+      vi.stubEnv('VITE_SUPABASE_URL', '')
+      vi.stubEnv('VITE_SUPABASE_ANON_KEY', '')
+      const { SUPABASE_URL, SUPABASE_ANON_KEY, IS_SUPABASE_CONFIGURED } =
+        await import('@/config/env')
+      expect(SUPABASE_URL).toBe('')
+      expect(SUPABASE_ANON_KEY).toBe('')
+      expect(IS_SUPABASE_CONFIGURED).toBe(false)
+    })
+
+    it('recognizes configured values when both are present and trims whitespace', async () => {
+      vi.stubEnv('VITE_SUPABASE_URL', '  https://test.supabase.co  ')
+      vi.stubEnv('VITE_SUPABASE_ANON_KEY', '  anon-key-123  ')
+      const { SUPABASE_URL, SUPABASE_ANON_KEY, IS_SUPABASE_CONFIGURED } =
+        await import('@/config/env')
+      expect(SUPABASE_URL).toBe('https://test.supabase.co')
+      expect(SUPABASE_ANON_KEY).toBe('anon-key-123')
+      expect(IS_SUPABASE_CONFIGURED).toBe(true)
+    })
+
+    it('is not configured if only URL is provided', async () => {
+      vi.stubEnv('VITE_SUPABASE_URL', 'https://test.supabase.co')
+      vi.stubEnv('VITE_SUPABASE_ANON_KEY', '')
+      const { IS_SUPABASE_CONFIGURED } = await import('@/config/env')
+      expect(IS_SUPABASE_CONFIGURED).toBe(false)
+    })
+
+    it('is not configured if only ANON_KEY is provided', async () => {
+      vi.stubEnv('VITE_SUPABASE_URL', '')
+      vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'anon-key-123')
+      const { IS_SUPABASE_CONFIGURED } = await import('@/config/env')
+      expect(IS_SUPABASE_CONFIGURED).toBe(false)
+    })
+  })
+
   describe('appConfig frozen object', () => {
     it('is frozen', async () => {
       const { appConfig } = await import('@/config/env')
@@ -96,6 +132,9 @@ describe('env config', () => {
       expect(appConfig).toHaveProperty('STORAGE_PREFIX')
       expect(appConfig).toHaveProperty('LEGACY_STORAGE_PREFIX')
       expect(appConfig).toHaveProperty('ENABLE_DEBUG')
+      expect(appConfig).toHaveProperty('SUPABASE_URL')
+      expect(appConfig).toHaveProperty('SUPABASE_ANON_KEY')
+      expect(appConfig).toHaveProperty('IS_SUPABASE_CONFIGURED')
     })
   })
 })

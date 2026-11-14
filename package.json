@@ -17,6 +17,7 @@
     "format:write": "prettier --write \"src/**/*.{ts,vue,css,html}\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
     "chart.js": "^4.6.1",
     "pinia": "^2.2.4",
     "vue": "^3.5.12",

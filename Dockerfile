@@ -15,6 +15,18 @@ RUN pnpm install --frozen-lockfile || pnpm install
 # Copy application source code
 COPY . .
 
+# Build arguments for Vite environment configuration (optional)
+ARG VITE_APP_NAME
+ARG VITE_STORAGE_PREFIX
+ARG VITE_ENABLE_DEBUG
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ENV VITE_APP_NAME=$VITE_APP_NAME
+ENV VITE_STORAGE_PREFIX=$VITE_STORAGE_PREFIX
+ENV VITE_ENABLE_DEBUG=$VITE_ENABLE_DEBUG
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+
 # Build production bundle
 RUN pnpm run build
 

@@ -50,13 +50,27 @@ const rawDebug = getRaw('VITE_ENABLE_DEBUG')
 export const ENABLE_DEBUG: boolean = rawDebug?.toLowerCase() === 'true'
 
 // ---------------------------------------------------------------------------
+// VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY
+// ---------------------------------------------------------------------------
+const rawSupabaseUrl = getRaw('VITE_SUPABASE_URL')
+export const SUPABASE_URL: string = rawSupabaseUrl?.trim() || ''
+
+const rawSupabaseAnonKey = getRaw('VITE_SUPABASE_ANON_KEY')
+export const SUPABASE_ANON_KEY: string = rawSupabaseAnonKey?.trim() || ''
+
+export const IS_SUPABASE_CONFIGURED: boolean = Boolean(SUPABASE_URL) && Boolean(SUPABASE_ANON_KEY)
+
+// ---------------------------------------------------------------------------
 // Frozen config object (convenient single import)
 // ---------------------------------------------------------------------------
 export const appConfig = Object.freeze({
   APP_NAME,
   STORAGE_PREFIX,
   LEGACY_STORAGE_PREFIX,
-  ENABLE_DEBUG
+  ENABLE_DEBUG,
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  IS_SUPABASE_CONFIGURED
 } as const)
 
 export type AppConfig = typeof appConfig
