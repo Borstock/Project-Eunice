@@ -1,19 +1,34 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { RouterView } from 'vue-router'
 import AppNavbar from '@/components/layout/AppNavbar.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import MigrationModal from '@/components/common/MigrationModal.vue'
 import { useHabitStore } from '@/stores/habitStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 
+const authStore = useAuthStore()
 const habitStore = useHabitStore()
 const settingsStore = useSettingsStore()
 
 onMounted(async () => {
   await settingsStore.initTheme()
+  if (!authStore.isInitialized) {
+    await authStore.initialize()
+  }
   await habitStore.initStore()
 })
+
+// React dynamically to authentication state changes (login, logout, session restoration)
+watch(
+  () => authStore.user?.id,
+  async (newUserId, oldUserId) => {
+    if (newUserId !== oldUserId && authStore.isInitialized) {
+      await habitStore.initStore()
+    }
+  }
+)
 </script>
 
 <template>

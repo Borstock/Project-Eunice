@@ -204,9 +204,10 @@ describe('SupabaseHabitRepository', () => {
   it('uploads migration data excluding demo habits', async () => {
     mockUpsert.mockResolvedValue({ error: null })
 
+    const validId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
     const habits: Habit[] = [
       {
-        id: 'real-1',
+        id: validId,
         name: 'Real Habit',
         emoji: '🎯',
         color: '#10b981',
@@ -224,7 +225,7 @@ describe('SupabaseHabitRepository', () => {
     ]
 
     const completions = {
-      'real-1': ['2026-01-01', '2026-01-02'],
+      [validId]: ['2026-01-01', '2026-01-02'],
       'demo-1': ['2026-01-01']
     }
 
@@ -237,7 +238,7 @@ describe('SupabaseHabitRepository', () => {
     expect(mockUpsert).toHaveBeenCalledWith(
       [
         expect.objectContaining({
-          id: 'real-1',
+          id: validId,
           user_id: 'user-123',
           is_demo: false
         })
@@ -247,10 +248,52 @@ describe('SupabaseHabitRepository', () => {
 
     expect(mockUpsert).toHaveBeenCalledWith(
       expect.arrayContaining([
-        expect.objectContaining({ habit_id: 'real-1', date: '2026-01-01' }),
-        expect.objectContaining({ habit_id: 'real-1', date: '2026-01-02' })
+        expect.objectContaining({ habit_id: validId, date: '2026-01-01' }),
+        expect.objectContaining({ habit_id: validId, date: '2026-01-02' })
       ]),
       { onConflict: 'habit_id,date' }
     )
+  })
+
+  it('safely converts legacy non-UUID habit ids to valid UUIDs and remaps completions', async () => {
+    mockUpsert.mockResolvedValue({ error: null })
+
+    const legacyHabit: Habit = {
+      id: 'legacy_habit_123',
+      name: 'Legacy Habit',
+      emoji: '📜',
+      color: '#3b82f6',
+      createdAt: '2026-01-01T00:00:00Z',
+      isDemo: false
+    }
+
+    const completions = {
+      legacy_habit_123: ['2026-01-01']
+    }
+
+    const result = await repo.uploadMigrationData([legacyHabit], completions)
+
+    expect(result.uploadedHabits).toBe(1)
+    expect(result.uploadedCompletions).toBe(1)
+
+    // Inspect the generated UUID used in habit upsert
+    const habitUpsertCall = mockUpsert.mock.calls.find(
+      (call) => Array.isArray(call[0]) && (call[0] as Array<Record<string, unknown>>)[0]?.name === 'Legacy Habit'
+    )
+    expect(habitUpsertCall).toBeDefined()
+    const generatedHabitId = (habitUpsertCall as unknown[][])?.[0]?.[0] as Record<string, unknown> | undefined
+    const habitId = generatedHabitId?.id as string | undefined
+    expect(habitId).not.toBe('legacy_habit_123')
+    expect(habitId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    )
+
+    // Check completion was remapped to the generated UUID
+    const compUpsertCall = mockUpsert.mock.calls.find(
+      (call) => Array.isArray(call[0]) && (call[0] as Array<Record<string, unknown>>)[0]?.date === '2026-01-01'
+    )
+    expect(compUpsertCall).toBeDefined()
+    const compRow = (compUpsertCall as unknown[][])?.[0]?.[0] as Record<string, unknown> | undefined
+    expect(compRow?.habit_id).toBe(habitId)
   })
 })

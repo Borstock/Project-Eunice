@@ -98,13 +98,16 @@ export const useHabitStore = defineStore('habit', {
       const repo = resolveRepository(repoOrStorage, authStore)
 
       if (authStore.isAuthenticated && repo instanceof SupabaseHabitRepository) {
+        this.syncStatus = 'syncing'
+        this.syncError = null
+
         // Fast instant render from cache if available
         const cachedHabits = await repo.getCachedHabits()
-        if (cachedHabits && Array.isArray(cachedHabits)) {
+        if (cachedHabits && Array.isArray(cachedHabits) && cachedHabits.length > 0) {
           this.habits = cachedHabits
         }
         const cachedCompletions = await repo.getCachedCompletions()
-        if (cachedCompletions) {
+        if (cachedCompletions && Object.keys(cachedCompletions).length > 0) {
           this.completions = cachedCompletions
         }
 
@@ -135,9 +138,18 @@ export const useHabitStore = defineStore('habit', {
           repo.getHabits(),
           repo.getCompletions()
         ])
-        this.habits = cloudHabits
-        this.completions = cloudCompletions
-        this.syncStatus = 'synced'
+
+        if (this.migrationPromptOpen && cloudHabits.length === 0 && this.localMigrationCandidate) {
+          // If first-login migration is currently prompted and cloud is empty,
+          // display the candidate habits so the UI isn't jarringly blank,
+          // but do NOT claim 'synced' until user actually completes or declines migration.
+          this.habits = this.localMigrationCandidate.habits
+          this.syncStatus = 'syncing'
+        } else {
+          this.habits = cloudHabits
+          this.completions = cloudCompletions
+          this.syncStatus = 'synced'
+        }
       } catch (err) {
         this.syncStatus = 'error'
         this.syncError = (err as Error).message
@@ -440,6 +452,11 @@ export const useHabitStore = defineStore('habit', {
       }
       this.migrationPromptOpen = false
       this.localMigrationCandidate = null
+      if (startEmpty) {
+        this.habits = []
+        this.completions = {}
+        this.syncStatus = 'synced'
+      }
     },
 
     // Legacy compatibility method

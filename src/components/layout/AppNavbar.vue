@@ -69,12 +69,14 @@ async function handleSignOut() {
           <!-- Sync Status Badge (Authenticated only) -->
           <div v-if="authStore.isAuthenticated" class="hidden sm:flex items-center text-xs mr-1">
             <span
-              v-if="habitStore.syncStatus === 'syncing'"
+              v-if="habitStore.syncStatus === 'syncing' || habitStore.migrationPromptOpen"
               class="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400 font-medium"
               title="Syncing changes with cloud..."
             >
               <span class="inline-block animate-spin text-[10px]">🔄</span>
-              <span class="hidden md:inline text-[11px]">Syncing...</span>
+              <span class="hidden md:inline text-[11px]">
+                {{ habitStore.migrationPromptOpen ? 'Migration pending' : 'Syncing...' }}
+              </span>
             </span>
 
             <button

@@ -4,6 +4,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import LoginView from '@/views/auth/LoginView.vue'
 import { useAuthStore } from '@/stores/authStore'
+import { useHabitStore } from '@/stores/habitStore'
 
 describe('LoginView.vue', () => {
   let router: ReturnType<typeof createRouter>
@@ -49,7 +50,9 @@ describe('LoginView.vue', () => {
 
   it('submits credentials and navigates on success', async () => {
     const authStore = useAuthStore()
+    const habitStore = useHabitStore()
     vi.spyOn(authStore, 'signIn').mockResolvedValueOnce({ success: true })
+    const initSpy = vi.spyOn(habitStore, 'initStore').mockResolvedValue()
     const pushSpy = vi.spyOn(router, 'push')
 
     const wrapper = mount(LoginView, {
@@ -61,6 +64,7 @@ describe('LoginView.vue', () => {
     await wrapper.find('form').trigger('submit.prevent')
 
     expect(authStore.signIn).toHaveBeenCalledWith('test@example.com', 'password123')
+    expect(initSpy).toHaveBeenCalled()
     expect(pushSpy).toHaveBeenCalledWith('/today')
   })
 

@@ -2,9 +2,11 @@
 import { ref } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useHabitStore } from '@/stores/habitStore'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const habitStore = useHabitStore()
 
 const email = ref('')
 const password = ref('')
@@ -37,6 +39,7 @@ async function handleSignUp() {
     if (result.needsEmailConfirmation) {
       confirmationSent.value = true
     } else {
+      await habitStore.initStore()
       router.push('/today')
     }
   } else if (result.error) {

@@ -4,6 +4,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import SignUpView from '@/views/auth/SignUpView.vue'
 import { useAuthStore } from '@/stores/authStore'
+import { useHabitStore } from '@/stores/habitStore'
 
 describe('SignUpView.vue', () => {
   let router: ReturnType<typeof createRouter>
@@ -74,10 +75,12 @@ describe('SignUpView.vue', () => {
 
   it('navigates to /today on immediate session', async () => {
     const authStore = useAuthStore()
+    const habitStore = useHabitStore()
     vi.spyOn(authStore, 'signUp').mockResolvedValueOnce({
       success: true,
       needsEmailConfirmation: false
     })
+    const initSpy = vi.spyOn(habitStore, 'initStore').mockResolvedValue()
     const pushSpy = vi.spyOn(router, 'push')
 
     const wrapper = mount(SignUpView, {
@@ -89,6 +92,7 @@ describe('SignUpView.vue', () => {
     await wrapper.find('input#confirmPassword').setValue('password123')
     await wrapper.find('form').trigger('submit.prevent')
 
+    expect(initSpy).toHaveBeenCalled()
     expect(pushSpy).toHaveBeenCalledWith('/today')
   })
 })

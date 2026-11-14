@@ -3,6 +3,7 @@ import type { IHabitRepository } from './IHabitRepository'
 import { getSupabase } from '@/services/supabase/client'
 import type { IStorageService } from '@/services/storage/IStorageService'
 import { localStorageService } from '@/services/storage/LocalStorageService'
+import { isValidUUID, generateUUID } from '@/utils/uuid'
 
 const CLOUD_CACHE_HABITS = 'cloud_cached_habits'
 const CLOUD_CACHE_COMPLETIONS = 'cloud_cached_completions'
@@ -248,16 +249,22 @@ export class SupabaseHabitRepository implements IHabitRepository {
     const supabase = getSupabase()
     const userId = await this.getUserId()
 
-    const habitRows = realHabits.map((h) => ({
-      id: h.id,
-      user_id: userId,
-      name: h.name,
-      emoji: h.emoji,
-      color: h.color,
-      archived: Boolean(h.archived),
-      is_demo: false,
-      created_at: h.createdAt
-    }))
+    // Map each habit to a valid UUID to satisfy Postgres schema constraints
+    const idMap = new Map<string, string>()
+    const habitRows = realHabits.map((h) => {
+      const validId = isValidUUID(h.id) ? h.id : generateUUID()
+      idMap.set(h.id, validId)
+      return {
+        id: validId,
+        user_id: userId,
+        name: h.name,
+        emoji: h.emoji,
+        color: h.color,
+        archived: Boolean(h.archived),
+        is_demo: false,
+        created_at: h.createdAt
+      }
+    })
 
     const { error: habitError } = await supabase
       .from('habits')
@@ -267,7 +274,6 @@ export class SupabaseHabitRepository implements IHabitRepository {
       throw new Error(`Migration habit upload failed: ${habitError.message}`)
     }
 
-    const realHabitIds = new Set(realHabits.map((h) => h.id))
     const completionRows: Array<{
       habit_id: string
       user_id: string
@@ -276,10 +282,11 @@ export class SupabaseHabitRepository implements IHabitRepository {
     }> = []
 
     for (const [habitId, dates] of Object.entries(completions)) {
-      if (!realHabitIds.has(habitId) || !Array.isArray(dates)) continue
+      const cloudHabitId = idMap.get(habitId)
+      if (!cloudHabitId || !Array.isArray(dates)) continue
       for (const date of dates) {
         completionRows.push({
-          habit_id: habitId,
+          habit_id: cloudHabitId,
           user_id: userId,
           date,
           completed_at: new Date().toISOString()

@@ -95,6 +95,11 @@ describe('AppNavbar.vue', () => {
 
     expect(wrapper.text()).toContain('Syncing...')
 
+    habitStore.migrationPromptOpen = true
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('Migration pending')
+    habitStore.migrationPromptOpen = false
+
     habitStore.syncStatus = 'error'
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('Sync error (Retry)')

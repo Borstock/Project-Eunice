@@ -185,4 +185,65 @@ describe('Data Migration', () => {
     // Marked as dismissed in localStorage
     expect(localStorage.getItem('migration_dismissed_user-abc')).toBe('true')
   })
+
+  it('triggers migration flow on initStore when authenticated and local habits exist with empty cloud', async () => {
+    const authStore = useAuthStore()
+    authStore.user = { id: 'user-abc', email: 'test@example.com' } as unknown as User
+    authStore.session = {
+      access_token: 'token'
+    } as unknown as import('@supabase/supabase-js').Session
+
+    const realHabit: Habit = {
+      id: 'h-local',
+      name: 'Running',
+      emoji: '🏃',
+      color: '#ef4444',
+      createdAt: '2026-01-01T00:00:00Z',
+      isDemo: false
+    }
+    await localHabitRepository.saveHabit(realHabit)
+
+    vi.spyOn(supabaseHabitRepository, 'getHabits').mockResolvedValueOnce([])
+    vi.spyOn(supabaseHabitRepository, 'getCompletions').mockResolvedValueOnce({})
+
+    const habitStore = useHabitStore()
+    await habitStore.initStore()
+
+    // Migration prompt must be open
+    expect(habitStore.migrationPromptOpen).toBe(true)
+    expect(habitStore.localMigrationCandidate?.habits).toHaveLength(1)
+    // Habits in UI must still show local habits while deciding
+    expect(habitStore.habits).toHaveLength(1)
+    expect(habitStore.habits[0]?.name).toBe('Running')
+    // Navbar sync status must NOT falsely report 'synced'
+    expect(habitStore.syncStatus).toBe('syncing')
+  })
+
+  it('preserves local storage when choosing "Start empty"', async () => {
+    const authStore = useAuthStore()
+    authStore.user = { id: 'user-abc', email: 'test@example.com' } as unknown as User
+
+    const realHabit: Habit = {
+      id: 'h-local',
+      name: 'Meditation',
+      emoji: '🧘',
+      color: '#10b981',
+      createdAt: '2026-01-01T00:00:00Z',
+      isDemo: false
+    }
+    await localHabitRepository.saveHabit(realHabit)
+
+    const habitStore = useHabitStore()
+    await habitStore.checkMigrationNeeded()
+    habitStore.dismissMigration(true)
+
+    // Local storage is preserved
+    const remaining = await localHabitRepository.getHabits()
+    expect(remaining).toHaveLength(1)
+    expect(remaining[0]?.name).toBe('Meditation')
+
+    // But current store state starts empty
+    expect(habitStore.habits).toHaveLength(0)
+    expect(habitStore.syncStatus).toBe('synced')
+  })
 })
