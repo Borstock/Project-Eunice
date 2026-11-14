@@ -79,25 +79,37 @@ A GitHub Actions workflow (`.github/workflows/ci.yml`) automatically triggers on
 
 ## 4. Software Architecture & Design Principles
 
-### 4.1 Storage Abstraction Layer (Hexagonal / Port & Adapter Pattern)
+### 4.1 Storage & Repository Layer (Port & Adapter Pattern)
 
-To allow zero-friction transitions in Phase 2 (such as swapping `localStorage` for `IndexedDB` or a cloud-sync adapter like Supabase/Firebase free tiers), the app accesses storage solely via an abstraction interface:
+The app accesses data solely via repository interfaces, decoupling the Vue components and Pinia store from the underlying storage mechanism:
 
 ```typescript
-// src/services/storage/IStorageService.ts
-export interface IStorageService {
-  getItem<T>(key: string): Promise<T | null> | T | null
-  setItem<T>(key: string, value: T): Promise<void> | void
-  removeItem(key: string): Promise<void> | void
-  clear(): Promise<void> | void
+// src/services/repository/IHabitRepository.ts
+export interface IHabitRepository {
+  getHabits(): Promise<Habit[]>
+  saveHabit(habit: Habit): Promise<void>
+  updateHabit(
+    id: string,
+    updates: Partial<Pick<Habit, 'name' | 'emoji' | 'color' | 'archived'>>
+  ): Promise<void>
+  deleteHabit(id: string): Promise<void>
+  getCompletions(): Promise<Record<string, string[]>>
+  toggleCompletion(habitId: string, date: string, completed: boolean): Promise<void>
+  setCompletions(habitId: string, dates: string[]): Promise<void>
+  clearAll(): Promise<void>
+  deleteDemoData(): Promise<void>
 }
 ```
 
-The domain logic communicates via a repository or service (`HabitRepository`) that relies on this interface, never invoking `localStorage` or `window` directly from Vue components or Pinia actions.
+- **`LocalHabitRepository`**: Uses `IStorageService` (`localStorage`) for guest users and unit testing.
+- **`SupabaseHabitRepository`**: Communicates with Supabase Postgres for authenticated users. All queries and mutations are strictly scoped by `user_id`. Maintains a local cache in `localStorage` (`cloud_cached_*`) for instant UI rendering.
+- **Optimistic Updates & Sync Status**: State updates optimistically in the Pinia store while the repository syncs in the background, updating `syncStatus` (`synced`, `syncing`, `error`) reactively shown in the navigation bar.
+- **First-Login Migration Flow**: When an authenticated user logs in with existing local data, `MigrationModal.vue` prompts them to upload their data or start empty. Uploads exclude demo data and use idempotent upsert (`onConflict`), preserving local data until cloud upload confirms success.
 
 ### 4.2 State Management (Pinia)
 
-- **`useHabitStore`**: Single source of truth for habits, completion records, active date selections, and derived calculations (streaks, today's status).
+- **`useAuthStore`**: Manages Supabase session, authenticated user profile, and reactive auth state changes.
+- **`useHabitStore`**: Single source of truth for habits, completion records, active date selections, sync status, and derived calculations (streaks, today's status). Resolves repository dynamically based on auth state.
 - **`useSettingsStore`**: User preferences (theme: light/dark/system).
 - State must remain serializable (plain objects, strings, numbers, arrays).
 

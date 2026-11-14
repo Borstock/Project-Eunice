@@ -3,10 +3,12 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ThemeToggle from './ThemeToggle.vue'
 import { APP_NAME } from '@/config/env'
 import { useAuthStore } from '@/stores/authStore'
+import { useHabitStore } from '@/stores/habitStore'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const habitStore = useHabitStore()
 
 const navItems = [
   { name: 'Today', path: '/today' },
@@ -22,6 +24,7 @@ function isActive(path: string): boolean {
 
 async function handleSignOut() {
   await authStore.signOut()
+  await habitStore.initStore()
   router.push('/today')
 }
 </script>
@@ -61,12 +64,44 @@ async function handleSignOut() {
           </RouterLink>
         </nav>
 
-        <!-- Actions: Auth Status & Theme Toggle -->
+        <!-- Actions: Sync Status, Auth & Theme Toggle -->
         <div class="flex items-center space-x-2">
+          <!-- Sync Status Badge (Authenticated only) -->
+          <div v-if="authStore.isAuthenticated" class="hidden sm:flex items-center text-xs mr-1">
+            <span
+              v-if="habitStore.syncStatus === 'syncing'"
+              class="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400 font-medium"
+              title="Syncing changes with cloud..."
+            >
+              <span class="inline-block animate-spin text-[10px]">🔄</span>
+              <span class="hidden md:inline text-[11px]">Syncing...</span>
+            </span>
+
+            <button
+              v-else-if="habitStore.syncStatus === 'error'"
+              type="button"
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-400 hover:bg-red-100 transition-colors"
+              :title="habitStore.syncError ?? 'Sync failed'"
+              @click="habitStore.retrySync"
+            >
+              <span>⚠️</span>
+              <span>Sync error (Retry)</span>
+            </button>
+
+            <span
+              v-else
+              class="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium"
+              title="Cloud data is in sync"
+            >
+              <span class="text-xs">☁️</span>
+              <span class="hidden md:inline text-[11px]">Synced</span>
+            </span>
+          </div>
+
           <!-- Authenticated State -->
           <div v-if="authStore.isAuthenticated" class="flex items-center space-x-2">
             <span
-              class="hidden sm:inline-block text-xs font-medium text-gray-600 dark:text-gray-300 max-w-[130px] truncate"
+              class="hidden sm:inline-block text-xs font-medium text-gray-600 dark:text-gray-300 max-w-[120px] truncate"
               :title="authStore.userEmail ?? ''"
             >
               {{ authStore.userEmail }}

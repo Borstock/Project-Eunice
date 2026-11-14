@@ -84,8 +84,10 @@ describe('generateDemoData', () => {
     const { completions } = generateDemoData(ANCHOR)
     const daySet = new Set(completions['demo-3'] ?? [])
 
-    let weekdayCompleted = 0, weekdayTotal = 0
-    let weekendCompleted = 0, weekendTotal = 0
+    let weekdayCompleted = 0,
+      weekdayTotal = 0
+    let weekendCompleted = 0,
+      weekendTotal = 0
 
     for (let i = 89; i >= 0; i--) {
       const d = new Date(ANCHOR)
@@ -107,7 +109,7 @@ describe('generateDemoData', () => {
     // Weekday rate must be clearly higher — allow looser margin given sample size
     expect(weekdayRate).toBeGreaterThan(weekendRate)
     // Additionally verify weekend rate is below 30 %
-    expect(weekendRate).toBeLessThan(0.30)
+    expect(weekendRate).toBeLessThan(0.3)
   })
 
   it('the "improving" habit has higher completion in the second half', () => {

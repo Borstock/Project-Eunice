@@ -10,8 +10,8 @@ vi.mock('vue-chartjs', () => ({
   Bar: {
     name: 'Bar',
     props: ['data', 'options'],
-    template: '<div data-testid="bar-chart" />',
-  },
+    template: '<div data-testid="bar-chart" />'
+  }
 }))
 
 const router = createRouter({
@@ -20,15 +20,15 @@ const router = createRouter({
     { path: '/', component: { template: '<div />' } },
     { path: '/stats', component: { template: '<div />' } },
     { path: '/today', component: { template: '<div />' } },
-    { path: '/settings', component: { template: '<div />' } },
-  ],
+    { path: '/settings', component: { template: '<div />' } }
+  ]
 })
 
 function mountStats() {
   return mount(StatsView, {
     global: {
-      plugins: [router],
-    },
+      plugins: [router]
+    }
   })
 }
 

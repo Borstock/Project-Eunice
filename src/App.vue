@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import AppNavbar from '@/components/layout/AppNavbar.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
+import MigrationModal from '@/components/common/MigrationModal.vue'
 import { useHabitStore } from '@/stores/habitStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 
@@ -24,5 +25,6 @@ onMounted(async () => {
       <RouterView />
     </div>
     <AppFooter />
+    <MigrationModal />
   </div>
 </template>

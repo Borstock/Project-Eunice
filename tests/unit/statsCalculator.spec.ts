@@ -5,7 +5,7 @@ import {
   calculateWeeklyStats,
   calculateMonthlyStats,
   calculateDayOfWeekStats,
-  calculateOverallSummary,
+  calculateOverallSummary
 } from '@/utils/statsCalculator'
 import type { Habit } from '@/models/habit'
 import { getPastDates } from '@/utils/date'
@@ -18,15 +18,15 @@ const mockHabits: Habit[] = [
     name: 'Morning Meditation',
     emoji: '🧘',
     color: '#6366f1',
-    createdAt: '2026-08-01T00:00:00.000Z',
+    createdAt: '2026-08-01T00:00:00.000Z'
   },
   {
     id: 'h2',
     name: 'Evening Run',
     emoji: '🏃',
     color: '#f59e0b',
-    createdAt: '2026-08-01T00:00:00.000Z',
-  },
+    createdAt: '2026-08-01T00:00:00.000Z'
+  }
 ]
 
 describe('statsCalculator', () => {
@@ -84,7 +84,7 @@ describe('statsCalculator', () => {
       // habit 1 completes every day in the most recent week
       const lastWeek = all84.slice(all84.length - 7)
       const completions = {
-        h1: lastWeek,
+        h1: lastWeek
       }
 
       const weekly = calculateWeeklyStats([mockHabits[0]!], completions, 12, ANCHOR)
@@ -108,7 +108,7 @@ describe('statsCalculator', () => {
   describe('calculateMonthlyStats', () => {
     it('returns monthly stats for the last N months', () => {
       const completions = {
-        h1: ['2026-11-10', '2026-11-11', '2026-11-12'],
+        h1: ['2026-11-10', '2026-11-11', '2026-11-12']
       }
 
       const monthly = calculateMonthlyStats([mockHabits[0]!], completions, 3, ANCHOR)
@@ -126,16 +126,14 @@ describe('statsCalculator', () => {
       const days = calculateDayOfWeekStats([mockHabits[0]!], {}, 90, ANCHOR)
 
       expect(days).toHaveLength(7)
-      expect(days.map((d) => d.dayName)).toEqual([
-        'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
-      ])
+      expect(days.map((d) => d.dayName)).toEqual(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
     })
 
     it('aggregates completions on corresponding weekdays', () => {
       // Anchor '2026-11-13' is Friday.
       // 2026-11-13 is Friday
       const completions = {
-        h1: ['2026-11-13'],
+        h1: ['2026-11-13']
       }
 
       const days = calculateDayOfWeekStats([mockHabits[0]!], completions, 7, ANCHOR)
@@ -169,7 +167,7 @@ describe('statsCalculator', () => {
 
       const completions = {
         h1: h1Completions,
-        h2: h2Completions,
+        h2: h2Completions
       }
 
       const summary = calculateOverallSummary(mockHabits, completions, ANCHOR)
